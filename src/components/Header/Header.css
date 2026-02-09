@@ -1,0 +1,149 @@
+.header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 60px;
+  background-color: #86efac;
+  color: #1f2937;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  z-index: 1000;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border-bottom: 3px solid #166534;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.hamburger-btn {
+  display: none;
+  flex-direction: column;
+  justify-content: space-around;
+  width: 30px;
+  height: 30px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  z-index: 10;
+}
+
+.hamburger-line {
+  width: 100%;
+  height: 3px;
+  background-color: #1f2937;
+  border-radius: 3px;
+  transition: all 0.3s ease;
+  transform-origin: center;
+}
+
+.hamburger-line.active:nth-child(1) {
+  transform: rotate(45deg) translate(8px, 8px);
+}
+
+.hamburger-line.active:nth-child(2) {
+  opacity: 0;
+}
+
+.hamburger-line.active:nth-child(3) {
+  transform: rotate(-45deg) translate(8px, -8px);
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+  height: 50px;
+}
+
+.logo-image {
+  height: 45px;
+  width: auto;
+  object-fit: contain;
+  max-width: 200px;
+}
+
+.header-nav {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+}
+
+.nav-link {
+  color: #1f2937;
+  text-decoration: none;
+  font-size: 14px;
+  transition: color 0.2s;
+  font-weight: 500;
+}
+
+.nav-link:hover {
+  color: #166534;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.btn-login,
+.btn-logout {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 4px;
+  background-color: #22c55e;
+  color: white;
+  cursor: pointer;
+  font-size: 14px;
+  text-decoration: none;
+  display: inline-block;
+  transition: background-color 0.2s;
+}
+
+.btn-login:hover,
+.btn-logout:hover {
+  background-color: #16a34a;
+}
+
+@media (max-width: 768px) {
+  .header {
+    height: 56px;
+    padding: 0 15px;
+  }
+
+  .hamburger-btn {
+    display: flex;
+  }
+
+  .header-nav {
+    display: none;
+  }
+  
+  .logo-image {
+    height: 35px;
+    max-width: 150px;
+  }
+
+  .header-right {
+    gap: 10px;
+  }
+
+  .btn-login,
+  .btn-logout {
+    padding: 6px 12px;
+    font-size: 13px;
+    white-space: nowrap;
+  }
+
+  .logo-text {
+    font-size: 16px;
+  }
+}
+
