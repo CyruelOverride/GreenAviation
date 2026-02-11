@@ -4,17 +4,58 @@ import './RecursosAdicionales.css';
 
 const RecursosAdicionales = ({ isAuthenticated }) => {
   const resources = [
-    { id: 1, name: 'AIP', type: 'PDF', size: '2.5 MB' },
-    { id: 2, name: 'Manual Operativo', type: 'PDF', size: '4.2 MB' },
-    { id: 3, name: 'Manual del Avión', type: 'PDF', size: '3.8 MB' },
-    { id: 4, name: 'Manual de Maniobras', type: 'PDF', size: '2.1 MB' },
-    { id: 5, name: 'LAR 91 y 61', type: 'PDF', size: '1.5 MB' },
-    { id: 6, name: 'Otros', type: 'PDF', size: '1.0 MB' },
+    { 
+      id: 1, 
+      name: 'AIP', 
+      type: 'PDF', 
+      size: '2.5 MB',
+      filePath: '/documentos/AIP.pdf' // Ruta relativa desde public/
+    },
+    { 
+      id: 2, 
+      name: 'Manual Operativo', 
+      type: 'PDF', 
+      size: '4.2 MB',
+      filePath: '/documentos/Manual-Operativo.pdf'
+    },
+    { 
+      id: 3, 
+      name: 'Manual del Avión', 
+      type: 'PDF', 
+      size: '3.8 MB',
+      filePath: '/documentos/Manual-Avion.pdf'
+    },
+    { 
+      id: 4, 
+      name: 'Manual de Maniobras', 
+      type: 'PDF', 
+      size: '2.1 MB',
+      filePath: '/documentos/Manual-Maniobras.pdf'
+    },
+    { 
+      id: 5, 
+      name: 'LAR 91 y 61', 
+      type: 'PDF', 
+      size: '1.5 MB',
+      filePath: '/documentos/LAR-91-61.pdf'
+    },
+    { 
+      id: 6, 
+      name: 'Otros', 
+      type: 'PDF', 
+      size: '1.0 MB',
+      filePath: '/documentos/Otros.pdf'
+    },
   ];
 
-  const handleDownload = (resourceName) => {
-    // Función para manejar la descarga
-    alert(`Descargando ${resourceName}...`);
+  const handleDownload = (resource) => {
+    // Crear un link temporal para descargar el archivo
+    const link = document.createElement('a');
+    link.href = resource.filePath;
+    link.download = `${resource.name}.pdf`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   if (!isAuthenticated) {
@@ -59,12 +100,17 @@ const RecursosAdicionales = ({ isAuthenticated }) => {
                     <span className="resource-size">{resource.size}</span>
                   </div>
                 </div>
-                <button 
+                <a 
+                  href={resource.filePath}
+                  download
                   className="btn-download"
-                  onClick={() => handleDownload(resource.name)}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleDownload(resource);
+                  }}
                 >
                   Descargar
-                </button>
+                </a>
               </div>
             ))}
           </div>

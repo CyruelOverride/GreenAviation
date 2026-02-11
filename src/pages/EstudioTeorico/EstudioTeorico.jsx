@@ -85,11 +85,25 @@ const EstudioTeorico = ({ isAuthenticated, userRole }) => {
         <div className="manual-section">
           <h2>Manual de Piloto</h2>
           <div className="manual-card">
-            <div className="manual-icon">📖</div>
+            <div className="manual-icon">
+              <img 
+                src="/Imagenes/Logo manual.png" 
+                alt="Logo Manual Piloto Privado"
+                className="manual-logo"
+              />
+            </div>
             <div className="manual-info">
               <h3>Manual de Piloto Privado</h3>
               <p>Accede al manual completo en formato digital</p>
-              <button className="btn-primary">Abrir Manual</button>
+            </div>
+            <div className="manual-button-container">
+              <a 
+                href="/documentos/MANUAL DEL PILOTO PRIVADO.pdf"
+                download="Manual-del-Piloto-Privado.pdf"
+                className="btn-primary"
+              >
+                Descargar Manual
+              </a>
             </div>
           </div>
         </div>

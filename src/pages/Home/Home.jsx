@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import './Home.css';
 
 const Home = () => {
@@ -7,7 +8,7 @@ const Home = () => {
   const carouselItems = [
     {
       id: 1,
-      image: '/Imagenes/Instruccion parte 1.jpg',
+      image: '/Imagenes/Instruccion 5.jpeg',
       alt: 'Propósito',
       quote: 'Nuestro propósito es formar pilotos seguros, autónomos y conscientes de sus decisiones',
       author: null
@@ -21,10 +22,41 @@ const Home = () => {
     },
     {
       id: 3,
-      image: '/Imagenes/Panel de control aviacion 3.jpg',
+      image: '/Imagenes/Foto avion instruccion.jpeg',
       alt: 'Aviación',
       quote: 'Ciencia, libertad, aventura y belleza. ¿Qué más puede pedirse a la vida? Todo eso es aviación',
       author: '— Charles Lindberg'
+    }
+  ];
+
+  const benefitItems = [
+    {
+      id: 1,
+      image: '/Imagenes/Instruccion 4.jpeg',
+      icon: '📝',
+      title: 'Exámenes por capítulo y examen final',
+      description: 'Evalúa tu conocimiento con exámenes específicos por cada capítulo del curso y un examen final completo que cubre todos los temas.'
+    },
+    {
+      id: 2,
+      image: '/Imagenes/Instruccion parte 3.jpg',
+      icon: '📊',
+      title: 'Seguimiento de progreso',
+      description: 'Dashboard personalizado que muestra tu avance en cada módulo y área de conocimiento.'
+    },
+    {
+      id: 3,
+      image: '/Imagenes/Panel de control 4.jpeg',
+      icon: '✈️',
+      title: 'Preparación para chequeo real',
+      description: 'Simulaciones y prácticas que replican las condiciones del examen práctico.'
+    },
+    {
+      id: 4,
+      image: '/Imagenes/Instruccion parte 3.jpg',
+      icon: '🎯',
+      title: 'Examen Pre-Solo',
+      description: 'Accede al examen Pre-Solo una vez completado el 100% del curso. Evaluación completa para certificar tu preparación antes del vuelo.'
     }
   ];
 
@@ -44,29 +76,57 @@ const Home = () => {
     <div className="home">
       <section className="hero-section">
         <div className="hero-content">
-          <h1 className="hero-title">APRENDE A VOLAR</h1>
-          <h2 className="hero-subtitle">Curso de Piloto Privado</h2>
-          <p className="hero-description">
-            Este curso es todo lo que necesitas para prepararte para tu examen teórico y obtener tu certificado de piloto, 
-            con escuela de tierra en línea, preparación para exámenes y entrenamiento del mundo real.
-          </p>
-          
-          <div className="hero-features">
-            <div className="feature-item">
-              <span className="feature-icon">✓</span>
-              <span>Entrenamiento Incluyendo contenido audiovisual y manuales</span>
-            </div>
-            <div className="feature-item">
-              <span className="feature-icon">✓</span>
-              <span>Examen Teórico</span>
-            </div>
-            <div className="feature-item">
-              <span className="feature-icon">✓</span>
-              <span>Preparación para Examen Práctico</span>
-            </div>
+          <h1 className="hero-title">TU SUEÑO COMIENZA AQUÍ</h1>
+          <h2 className="hero-subtitle">CAMPUS VIRTUAL – CURSO DE PILOTO PRIVADO</h2>
+          <p className="hero-tagline">Enseñamos y formamos aviadores.</p>
+          <div className="hero-buttons">
+            <Link to="/estudio-teorico" className="btn-primary">Comenzar curso</Link>
+            <Link to="/recursos-adicionales" className="btn-secondary">Ver programa</Link>
           </div>
         </div>
+      </section>
 
+      <section className="description-section">
+        <div className="description-content">
+          <h2 className="section-title">Nuestro Compromiso con tu Formación</h2>
+          <p className="description-text">
+            Reunimos en éste campus virtual, la información que te llevará del primer clic a tu Licencia de Piloto: clases online de alta calidad, videos explicativos que acompañan el estudio teóricos.
+          </p>
+          <p className="description-text">
+            Preparación sólida para el examen escrito de la Dinacia y el entrenamiento práctico que transforma conocimiento en competencia.
+          </p>
+          <p className="description-text">
+            Un camino claro, acompañado por nuestros Instructores, diseñado para que avances con seguridad, eficiencia y confianza.
+          </p>
+          <p className="description-text">
+            Nuestro campus integra instrucción online de primer nivel, cada etapa del camino está pensada para que desarrolles criterio, seguridad y la confianza de volar al alto nivel.
+          </p>
+          <p className="description-text">
+            Aquí, es donde nacen los pilotos que marcan la diferencia.
+          </p>
+        </div>
+      </section>
+
+      <section className="benefits-section">
+        <div className="benefits-container">
+          <h2 className="section-title">Tu camino hacia la licencia de piloto</h2>
+          <div className="benefits-grid">
+            {benefitItems.map((item) => (
+              <div 
+                key={item.id} 
+                className="benefit-card" 
+                style={{ backgroundImage: `url('${item.image}')` }}
+              >
+                <div className="benefit-overlay"></div>
+                <div className="benefit-content">
+                  <div className="benefit-icon">{item.icon}</div>
+                  <h3 className="benefit-title">{item.title}</h3>
+                  <p className="benefit-description">{item.description}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
       </section>
 
       <section className="purpose-section">

@@ -24,20 +24,16 @@ const Header = ({ isAuthenticated, setIsAuthenticated, userRole, toggleSidebar, 
         </button>
         <Link to="/" className="logo">
           <img 
-            src="/Imagenes/GreenAviationLogo-removebg-preview.png" 
+            src="/Imagenes/Green Aviation logo negro.png" 
             alt="GreenAviation Logo" 
             className="logo-image"
           />
         </Link>
       </div>
       <nav className="header-nav">
-        {isAuthenticated && (
-          <>
-            <Link to="/estudio-teorico" className="nav-link">Mi Curso</Link>
-            <Link to="/examenes" className="nav-link">Exámenes</Link>
-            <Link to="/clases-online" className="nav-link">Clases Online</Link>
-          </>
-        )}
+        <Link to="/estudio-teorico" className="nav-link">Mi Curso</Link>
+        <Link to="/examenes" className="nav-link">Exámenes</Link>
+        <Link to="/clases-online" className="nav-link">Clases Online</Link>
       </nav>
       <div className="header-right">
         {isAuthenticated ? (

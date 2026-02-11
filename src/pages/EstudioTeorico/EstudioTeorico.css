@@ -135,15 +135,36 @@
 
 .manual-card {
   display: flex;
-  gap: 20px;
+  flex-direction: column;
   align-items: center;
-  padding: 20px;
+  justify-content: center;
+  gap: 20px;
+  padding: 30px;
   background: #f9fafb;
   border-radius: 8px;
+  text-align: center;
 }
 
 .manual-icon {
-  font-size: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 250px;
+  height: 300px;
+  flex-shrink: 0;
+  order: 1;
+}
+
+.manual-logo {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center;
+  border-radius: 8px;
+}
+
+.manual-info {
+  order: 2;
 }
 
 .manual-info h3 {
@@ -154,7 +175,12 @@
 
 .manual-info p {
   color: #6b7280;
-  margin-bottom: 15px;
+  margin-bottom: 0;
+}
+
+.manual-button-container {
+  order: 3;
+  margin-top: 10px;
 }
 
 .modules-list {
@@ -314,6 +340,9 @@
   font-size: 14px;
   cursor: pointer;
   transition: all 0.2s;
+  text-decoration: none;
+  display: inline-block;
+  text-align: center;
 }
 
 .btn-primary {
@@ -366,7 +395,15 @@
   .manual-card {
     flex-direction: column;
     text-align: center;
-    padding: 15px;
+    padding: 20px;
+  }
+  
+  .manual-button-container {
+    width: 100%;
+  }
+  
+  .manual-button-container .btn-primary {
+    width: 100%;
   }
 
   .manual-icon {

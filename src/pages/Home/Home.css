@@ -1,31 +1,37 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Open+Sans:wght@400;500;600;700&display=swap');
+
 .home {
   width: 100%;
   max-width: 1400px;
   margin: 0 auto;
+  font-family: 'Open Sans', sans-serif;
 }
 
 .hero-section {
   background: #f9fafb;
-  padding: 60px 40px;
+  padding: 100px 40px;
   display: flex;
-  gap: 40px;
+  flex-direction: column;
+  gap: 50px;
   align-items: center;
+  justify-content: center;
   position: relative;
   overflow: hidden;
+  min-height: 80vh;
 }
 
 .hero-section::before {
   content: '';
   position: absolute;
   top: 0;
-  right: 0;
+  left: 0;
   width: 100%;
   height: 100%;
-  background-image: url('/Imagenes/GreenAviationLogo-removebg-preview.png');
-  background-size: 70%;
+  background-image: url('/Imagenes/Foto avion aterdecer.jpeg');
+  background-size: cover;
   background-repeat: no-repeat;
-  background-position: center right;
-  opacity: 0.75;
+  background-position: center center;
+  opacity: 0.89;
   z-index: 0;
   pointer-events: none;
 }
@@ -34,30 +40,100 @@
   flex: 1;
   z-index: 2;
   position: relative;
+  background: transparent;
+  padding: 35px 30px;
+  text-align: center;
+}
+
+.hero-tagline {
+  font-size: 22px;
+  color: #ffffff;
+  margin-bottom: 30px;
+  font-weight: 500;
+  font-style: italic;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
 }
 
 .hero-title {
-  font-size: 48px;
+  font-size: 42px;
   font-weight: bold;
-  color: #166534;
-  margin-bottom: 10px;
+  color: #ffffff;
+  margin-bottom: 15px;
   text-transform: uppercase;
   letter-spacing: 2px;
+  text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.5);
 }
 
 .hero-subtitle {
-  font-size: 24px;
-  color: #166534;
-  margin-bottom: 20px;
-  font-weight: 500;
+  font-size: 20px;
+  color: #22c55e;
+  margin-bottom: 25px;
+  font-weight: 600;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
 }
 
 .hero-description {
-  font-size: 16px;
+  font-size: 15px;
   color: #1f2937;
-  line-height: 1.6;
-  margin-bottom: 30px;
-  max-width: 600px;
+  line-height: 1.5;
+  margin-bottom: 10px;
+  text-align: left;
+}
+
+.hero-buttons {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #16a34a 0%, #22c55e 100%);
+  color: white;
+  border: none;
+  padding: 18px 40px;
+  font-size: 18px;
+  font-weight: 600;
+  border-radius: 8px;
+  cursor: pointer;
+  text-transform: none;
+  letter-spacing: 0.5px;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(34, 197, 94, 0.4);
+  font-family: 'Montserrat', sans-serif;
+  text-decoration: none;
+  display: inline-block;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(34, 197, 94, 0.6);
+  background: linear-gradient(135deg, #15803d 0%, #16a34a 100%);
+}
+
+.btn-secondary {
+  background: rgba(255, 255, 255, 0.95);
+  color: #166534;
+  border: 2px solid #22c55e;
+  padding: 18px 40px;
+  font-size: 18px;
+  font-weight: 600;
+  border-radius: 8px;
+  cursor: pointer;
+  text-transform: none;
+  letter-spacing: 0.5px;
+  transition: all 0.3s ease;
+  font-family: 'Montserrat', sans-serif;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  text-decoration: none;
+  display: inline-block;
+}
+
+.btn-secondary:hover {
+  background: #22c55e;
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(34, 197, 94, 0.3);
 }
 
 .hero-features {
@@ -180,14 +256,19 @@
 
 .purpose-section {
   padding: 80px 40px;
-  background-color: #ffffff;
+  background: linear-gradient(135deg, #ffffff 0%, #f1f5f9 100%);
 }
 
 .carousel-container {
   max-width: 1400px;
   margin: 0 auto;
   position: relative;
-  padding: 40px 20px;
+  padding: 20px;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
 .carousel-wrapper {
@@ -302,9 +383,163 @@
   border-radius: 6px;
 }
 
+.stats-container {
+  max-width: 1200px;
+  width: 100%;
+  z-index: 2;
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 30px;
+  text-align: center;
+  background: rgba(255, 255, 255, 0.95);
+  padding: 30px 20px;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+}
+
+.description-section {
+  padding: 60px 40px;
+  background-color: #ffffff;
+}
+
+.description-content {
+  max-width: 900px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.description-text {
+  font-size: 16px;
+  color: #1f2937;
+  line-height: 1.8;
+  margin-bottom: 20px;
+  text-align: left;
+}
+
+.stat-item {
+  padding: 30px 20px;
+}
+
+.stat-number {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 56px;
+  font-weight: 800;
+  color: #000000;
+  margin-bottom: 10px;
+}
+
+.stat-label {
+  font-size: 18px;
+  color: #4b5563;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.benefits-section {
+  padding: 80px 40px;
+  background-color: #ffffff;
+}
+
+.benefits-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.benefits-section .section-title {
+  text-align: center;
+  margin-bottom: 60px;
+  font-family: 'Montserrat', sans-serif;
+  color: #166534;
+}
+
+.benefits-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 30px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.benefit-card {
+  background: #f8fafc;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  padding: 40px 30px;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  transition: all 0.3s ease;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  min-height: 300px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.benefit-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0.4) 0%,
+    rgba(0, 0, 0, 0.6) 100%
+  );
+  z-index: 1;
+  transition: all 0.3s ease;
+}
+
+.benefit-content {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+}
+
+.benefit-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 30px rgba(34, 197, 94, 0.15);
+  border-color: #22c55e;
+}
+
+.benefit-card:hover .benefit-overlay {
+  background: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0.3) 0%,
+    rgba(0, 0, 0, 0.5) 100%
+  );
+}
+
+.benefit-icon {
+  font-size: 48px;
+  margin-bottom: 20px;
+}
+
+.benefit-title {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  color: #ffffff;
+  margin-bottom: 15px;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.benefit-description {
+  font-size: 16px;
+  color: #f3f4f6;
+  line-height: 1.6;
+  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
+}
+
 .info-section {
   padding: 60px 40px;
-  background-color: #f9fafb;
+  background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
 }
 
 .info-content {
@@ -312,6 +547,7 @@
   margin: 0 auto;
   text-align: center;
   position: relative;
+  width: 100%;
 }
 
 .social-links {
@@ -338,7 +574,7 @@
 .social-icon:hover {
   background-color: #22c55e;
   transform: translateY(-3px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 4px 8px rgba(34, 197, 94, 0.3);
 }
 
 .social-icon svg {
@@ -347,8 +583,9 @@
 }
 
 .section-title {
-  font-size: 32px;
-  font-weight: bold;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 36px;
+  font-weight: 700;
   color: #166534;
   margin-bottom: 20px;
 }
@@ -443,17 +680,51 @@
     flex-direction: column;
     padding: 30px 20px;
     gap: 30px;
+    min-height: auto;
+  }
+
+  .hero-content {
+    padding: 25px 20px;
   }
 
   .hero-title {
-    font-size: 28px;
-    letter-spacing: 1px;
-    margin-bottom: 8px;
+    font-size: 32px;
+    margin-bottom: 15px;
   }
 
   .hero-subtitle {
     font-size: 18px;
-    margin-bottom: 15px;
+    margin-bottom: 30px;
+  }
+
+  .hero-buttons {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .btn-primary,
+  .btn-secondary {
+    width: 100%;
+    padding: 16px 32px;
+    font-size: 16px;
+  }
+
+  .stats-container {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 30px;
+  }
+
+  .stat-number {
+    font-size: 40px;
+  }
+
+  .benefits-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .benefit-card {
+    min-height: 280px;
   }
 
   .hero-description {
@@ -621,11 +892,19 @@
 
 @media (max-width: 480px) {
   .hero-title {
-    font-size: 24px;
+    font-size: 28px;
   }
 
   .hero-subtitle {
     font-size: 16px;
+  }
+
+  .stats-container {
+    grid-template-columns: 1fr;
+  }
+
+  .stat-number {
+    font-size: 36px;
   }
 
   .hero-description {
@@ -673,6 +952,7 @@
 .video-container {
   max-width: 1200px;
   margin: 0 auto;
+  width: 100%;
 }
 
 .video-wrapper {
@@ -736,10 +1016,11 @@
 }
 
 .video-info h3 {
+  font-family: 'Montserrat', sans-serif;
   font-size: 28px;
   color: #166534;
   margin-bottom: 15px;
-  font-weight: bold;
+  font-weight: 700;
 }
 
 .video-info p {
