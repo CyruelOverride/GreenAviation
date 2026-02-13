@@ -16,7 +16,7 @@
 
 .info-card-unauthenticated h2 {
   font-size: 28px;
-  color: #166534;
+  color: #1e40af;
   margin-bottom: 20px;
   text-align: center;
 }
@@ -46,7 +46,7 @@
   content: '✓';
   position: absolute;
   left: 0;
-  color: #10b981;
+  color: #3b82f6;
   font-weight: bold;
   font-size: 18px;
 }
@@ -67,7 +67,7 @@
 
 .page-title {
   font-size: 32px;
-  color: #166534;
+  color: #1e40af;
   margin-bottom: 30px;
   font-weight: bold;
 }
@@ -113,7 +113,7 @@
   padding: 15px;
   background: #f9fafb;
   border-radius: 6px;
-  border-left: 4px solid #22c55e;
+  border-left: 4px solid #3b82f6;
 }
 
 .exams-grid {
@@ -131,8 +131,8 @@
 }
 
 .exam-card:hover:not(.locked) {
-  border-color: #22c55e;
-  box-shadow: 0 4px 8px rgba(34, 197, 94, 0.1);
+  border-color: #3b82f6;
+  box-shadow: 0 4px 8px rgba(59, 130, 246, 0.1);
 }
 
 .exam-card.locked {
@@ -175,12 +175,12 @@
 }
 
 .btn-primary {
-  background-color: #166534;
+  background-color: #1e40af;
   color: white;
 }
 
 .btn-primary:hover {
-  background-color: #15803d;
+  background-color: #1d4ed8;
 }
 
 .btn-secondary {
@@ -286,7 +286,7 @@
 }
 
 .answer-option:hover {
-  border-color: #22c55e;
+  border-color: #3b82f6;
   background: #f0fdf4;
 }
 
@@ -348,7 +348,7 @@
 .score-value {
   font-size: 32px;
   font-weight: bold;
-  color: #10b981;
+  color: #3b82f6;
 }
 
 .score-label {
@@ -394,7 +394,7 @@
 }
 
 .stat-item.correct {
-  background: #d1fae5;
+  background: #dbeafe;
 }
 
 .stat-item.incorrect {
@@ -402,7 +402,7 @@
 }
 
 .stat-item.score {
-  background: #d1fae5;
+  background: #dbeafe;
 }
 
 .stat-label {
@@ -421,7 +421,7 @@
 }
 
 .stat-item.correct .stat-value {
-  color: #059669;
+  color: #2563eb;
 }
 
 .stat-item.incorrect .stat-value {
@@ -429,7 +429,7 @@
 }
 
 .stat-item.score .stat-value {
-  color: #166534;
+  color: #1e40af;
 }
 
 .results-details {
@@ -455,7 +455,7 @@
 
 .result-item.correct {
   background: #f0fdf4;
-  border-color: #10b981;
+  border-color: #3b82f6;
 }
 
 .result-item.incorrect {
@@ -484,8 +484,8 @@
 }
 
 .correct-badge {
-  background: #d1fae5;
-  color: #059669;
+  background: #dbeafe;
+  color: #2563eb;
 }
 
 .incorrect-badge {
@@ -528,7 +528,7 @@
 }
 
 .answer-value.correct {
-  color: #059669;
+  color: #2563eb;
 }
 
 .answer-value.incorrect {
@@ -540,8 +540,8 @@
 }
 
 .success-message {
-  background: #d1fae5;
-  border: 2px solid #10b981;
+  background: #dbeafe;
+  border: 2px solid #3b82f6;
   border-radius: 8px;
   padding: 20px;
   display: flex;
@@ -551,13 +551,13 @@
 
 .success-icon {
   font-size: 32px;
-  color: #059669;
+  color: #2563eb;
   font-weight: bold;
 }
 
 .success-message p {
   margin: 0;
-  color: #065f46;
+  color: #1e3a8a;
   font-size: 16px;
   font-weight: 500;
 }

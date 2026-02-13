@@ -16,7 +16,7 @@
 
 .info-card-unauthenticated h2 {
   font-size: 28px;
-  color: #166534;
+  color: #1e40af;
   margin-bottom: 20px;
   text-align: center;
 }
@@ -46,7 +46,7 @@
   content: '✓';
   position: absolute;
   left: 0;
-  color: #10b981;
+  color: #3b82f6;
   font-weight: bold;
   font-size: 18px;
 }
@@ -73,7 +73,7 @@
 
 .btn-export {
   padding: 8px 16px;
-  background-color: #10b981;
+  background-color: #3b82f6;
   color: white;
   border: none;
   border-radius: 6px;
@@ -83,7 +83,7 @@
 }
 
 .btn-export:hover {
-  background-color: #059669;
+  background-color: #2563eb;
 }
 
 .student-modal {
@@ -119,7 +119,7 @@
 
 .modal-header h2 {
   font-size: 24px;
-  color: #166534;
+  color: #1e40af;
   margin: 0;
 }
 
@@ -191,7 +191,7 @@
 
 .page-title {
   font-size: 32px;
-  color: #166534;
+  color: #1e40af;
   font-weight: bold;
 }
 
@@ -247,7 +247,7 @@
 
 .progress-cell .progress-bar {
   height: 100%;
-  background: linear-gradient(90deg, #22c55e, #166534);
+  background: linear-gradient(90deg, #3b82f6, #1e40af);
 }
 
 .progress-cell span {
@@ -264,8 +264,8 @@
 }
 
 .status-badge.activo {
-  background-color: #d1fae5;
-  color: #065f46;
+  background-color: #dbeafe;
+  color: #1e3a8a;
 }
 
 .admin-sections {
@@ -349,7 +349,7 @@
 .progress-value {
   font-size: 20px;
   font-weight: bold;
-  color: #166534;
+  color: #1e40af;
 }
 
 .progress-bar-container {
@@ -363,7 +363,7 @@
 
 .progress-bar {
   height: 100%;
-  background: linear-gradient(90deg, #22c55e, #166534);
+  background: linear-gradient(90deg, #3b82f6, #1e40af);
 }
 
 .flight-records {
@@ -392,12 +392,12 @@
 }
 
 .btn-primary {
-  background-color: #166534;
+  background-color: #1e40af;
   color: white;
 }
 
 .btn-primary:hover {
-  background-color: #15803d;
+  background-color: #1d4ed8;
 }
 
 .btn-secondary {

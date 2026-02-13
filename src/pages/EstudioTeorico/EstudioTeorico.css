@@ -16,7 +16,7 @@
 
 .info-card-unauthenticated h2 {
   font-size: 28px;
-  color: #166534;
+  color: #1e40af;
   margin-bottom: 20px;
   text-align: center;
 }
@@ -46,7 +46,7 @@
   content: '✓';
   position: absolute;
   left: 0;
-  color: #10b981;
+  color: #3b82f6;
   font-weight: bold;
   font-size: 18px;
 }
@@ -67,7 +67,7 @@
 
 .page-title {
   font-size: 32px;
-  color: #166534;
+  color: #1e40af;
   margin-bottom: 30px;
   font-weight: bold;
 }
@@ -95,7 +95,7 @@
 .progress-percentage {
   font-size: 24px;
   font-weight: bold;
-  color: #166534;
+  color: #1e40af;
 }
 
 .progress-bar-container {
@@ -108,7 +108,7 @@
 
 .progress-bar {
   height: 100%;
-  background: linear-gradient(90deg, #22c55e, #166534);
+  background: linear-gradient(90deg, #3b82f6, #1e40af);
   transition: width 0.3s ease;
 }
 
@@ -199,18 +199,18 @@
 }
 
 .module-card:hover {
-  border-color: #22c55e;
-  box-shadow: 0 2px 8px rgba(34, 197, 94, 0.1);
+  border-color: #3b82f6;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.1);
 }
 
 .module-card.completed {
   background: #f0fdf4;
-  border-color: #10b981;
+  border-color: #3b82f6;
 }
 
 .module-status {
   font-size: 24px;
-  color: #10b981;
+  color: #3b82f6;
   width: 30px;
   display: flex;
   align-items: center;
@@ -245,8 +245,8 @@
 }
 
 .drive-link-card:hover {
-  border-color: #22c55e;
-  box-shadow: 0 4px 8px rgba(34, 197, 94, 0.2);
+  border-color: #3b82f6;
+  box-shadow: 0 4px 8px rgba(59, 130, 246, 0.2);
   transform: translateY(-2px);
 }
 
@@ -272,7 +272,7 @@
   display: inline-flex;
   align-items: center;
   padding: 12px 24px;
-  background-color: #22c55e;
+  background-color: #3b82f6;
   color: white;
   text-decoration: none;
   border-radius: 6px;
@@ -284,9 +284,9 @@
 }
 
 .btn-drive-link:hover {
-  background-color: #16a34a;
+  background-color: #2563eb;
   transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(34, 197, 94, 0.3);
+  box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3);
 }
 
 .btn-drive-link svg {
@@ -346,12 +346,12 @@
 }
 
 .btn-primary {
-  background-color: #166534;
+  background-color: #1e40af;
   color: white;
 }
 
 .btn-primary:hover {
-  background-color: #15803d;
+  background-color: #1d4ed8;
 }
 
 .btn-secondary {
