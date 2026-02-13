@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import * as XLSX from 'xlsx';
 import './GestionAlumnos.css';
 
 const GestionAlumnos = ({ userRole, isAuthenticated }) => {
@@ -11,8 +12,26 @@ const GestionAlumnos = ({ userRole, isAuthenticated }) => {
   ]);
 
   const handleExport = () => {
-    // Simulación de exportación a Excel
-    alert('Funcionalidad de exportación a Excel - En desarrollo');
+    // Preparar datos para exportación
+    const data = students.map(student => ({
+      'ID': student.id,
+      'Nombre': student.name,
+      'Email': student.email,
+      'Progreso (%)': student.progress,
+      'Estado': student.status
+    }));
+
+    // Crear workbook y worksheet
+    const ws = XLSX.utils.json_to_sheet(data);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Alumnos');
+
+    // Generar nombre de archivo con fecha
+    const fecha = new Date().toISOString().split('T')[0];
+    const fileName = `alumnos_${fecha}.xlsx`;
+
+    // Descargar archivo
+    XLSX.writeFile(wb, fileName);
   };
 
   const [selectedStudent, setSelectedStudent] = useState(null);
@@ -26,7 +45,29 @@ const GestionAlumnos = ({ userRole, isAuthenticated }) => {
   };
 
   const handleExportStudent = (student) => {
-    alert(`Funcionalidad de exportación a Excel para ${student.name} - En desarrollo`);
+    // Preparar datos del alumno con información completa
+    const data = [{
+      'ID': student.id,
+      'Nombre Completo': student.name,
+      'Email': student.email,
+      'Progreso (%)': student.progress,
+      'Estado': student.status,
+      'Curso': 'Piloto Privado',
+      'Fecha de Inscripción': '15/01/2024',
+      'Último Acceso': '20/01/2024'
+    }];
+
+    // Crear workbook y worksheet
+    const ws = XLSX.utils.json_to_sheet(data);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Alumno');
+
+    // Generar nombre de archivo con el nombre del alumno
+    const nombreArchivo = student.name.replace(/\s+/g, '_').toLowerCase();
+    const fileName = `alumno_${nombreArchivo}.xlsx`;
+
+    // Descargar archivo
+    XLSX.writeFile(wb, fileName);
   };
 
   if (!isAuthenticated) {

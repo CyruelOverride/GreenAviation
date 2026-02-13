@@ -33,28 +33,24 @@ const Home = () => {
     {
       id: 1,
       image: '/Imagenes/Instruccion 4.jpeg',
-      icon: '📝',
       title: 'Exámenes por capítulo y examen final',
       description: 'Evalúa tu conocimiento con exámenes específicos por cada capítulo del curso y un examen final completo que cubre todos los temas.'
     },
     {
       id: 2,
       image: '/Imagenes/Instruccion parte 3.jpg',
-      icon: '📊',
       title: 'Seguimiento de progreso',
       description: 'Dashboard personalizado que muestra tu avance en cada módulo y área de conocimiento.'
     },
     {
       id: 3,
       image: '/Imagenes/Panel de control 4.jpeg',
-      icon: '✈️',
       title: 'Preparación para chequeo real',
       description: 'Simulaciones y prácticas que replican las condiciones del examen práctico.'
     },
     {
       id: 4,
       image: '/Imagenes/Instruccion 5.jpeg',
-      icon: '🎯',
       title: 'Examen Pre-Solo',
       description: 'Accede al examen Pre-Solo una vez completado el 100% del curso. Evaluación completa para certificar tu preparación antes del vuelo.'
     }
@@ -119,7 +115,6 @@ const Home = () => {
               >
                 <div className="benefit-overlay"></div>
                 <div className="benefit-content">
-                  <div className="benefit-icon">{item.icon}</div>
                   <h3 className="benefit-title">{item.title}</h3>
                   <p className="benefit-description">{item.description}</p>
                 </div>

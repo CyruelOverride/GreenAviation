@@ -20,10 +20,31 @@ const RecursosAdicionales = ({ isAuthenticated }) => {
     },
     { 
       id: 3, 
+      name: 'LAR 91 - Operaciones de Vuelo', 
+      type: 'PDF', 
+      size: '2.5 MB',
+      filePath: '/documentos/LAR 91 OPERACIONES DE VUELO.pdf'
+    },
+    { 
+      id: 4, 
       name: 'Manual del Piloto Privado', 
       type: 'PDF', 
       size: '18.89 MB',
       filePath: '/documentos/MANUAL DEL PILOTO PRIVADO.pdf'
+    },
+    { 
+      id: 5, 
+      name: 'Manual Piloto Privado 2026 (con Videos)', 
+      type: 'PDF', 
+      size: '25 MB',
+      filePath: '/documentos/MANUAL PILOTO PRIVADO 2026-CON VIDEOS FINAL.pdf'
+    },
+    { 
+      id: 6, 
+      name: 'Manual Piloto Privado 2026 (con Videos) - Word', 
+      type: 'DOCX', 
+      size: '30 MB',
+      filePath: '/documentos/MANUAL PILOTO PRIVADO 2026-CON VIDEOS FINAL.docx'
     },
   ];
 
@@ -33,7 +54,9 @@ const RecursosAdicionales = ({ isAuthenticated }) => {
     // Crear un link temporal para descargar el archivo
     const link = document.createElement('a');
     link.href = encodedPath;
-    link.download = `${resource.name}.pdf`;
+    // Obtener la extensión del archivo original
+    const fileExtension = resource.filePath.split('.').pop().toLowerCase();
+    link.download = `${resource.name}.${fileExtension}`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -49,7 +72,9 @@ const RecursosAdicionales = ({ isAuthenticated }) => {
           <ul>
             <li>Código Aeronáutico</li>
             <li>LAR 61 - Licencias</li>
+            <li>LAR 91 - Operaciones de Vuelo</li>
             <li>Manual del Piloto Privado</li>
+            <li>Manual Piloto Privado 2026 (con Videos)</li>
           </ul>
           <p className="auth-prompt">Inicia sesión para acceder a los recursos adicionales</p>
           <Link to="/login" className="btn-primary">Iniciar Sesión</Link>
@@ -80,7 +105,7 @@ const RecursosAdicionales = ({ isAuthenticated }) => {
                 </div>
                 <a 
                   href={encodeURI(resource.filePath)}
-                  download={`${resource.name}.pdf`}
+                  download={`${resource.name}.${resource.filePath.split('.').pop().toLowerCase()}`}
                   className="btn-download"
                   onClick={(e) => {
                     e.preventDefault();
