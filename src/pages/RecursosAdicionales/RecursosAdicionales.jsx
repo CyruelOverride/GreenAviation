@@ -6,52 +6,33 @@ const RecursosAdicionales = ({ isAuthenticated }) => {
   const resources = [
     { 
       id: 1, 
-      name: 'AIP', 
+      name: 'Código Aeronáutico', 
       type: 'PDF', 
-      size: '2.5 MB',
-      filePath: '/documentos/AIP.pdf' // Ruta relativa desde public/
+      size: '0.13 MB',
+      filePath: '/documentos/CODIGO AERONAUTICO.pdf'
     },
     { 
       id: 2, 
-      name: 'Manual Operativo', 
+      name: 'LAR 61 - Licencias', 
       type: 'PDF', 
-      size: '4.2 MB',
-      filePath: '/documentos/Manual-Operativo.pdf'
+      size: '1.96 MB',
+      filePath: '/documentos/LAR 61 LICENCIAS.pdf'
     },
     { 
       id: 3, 
-      name: 'Manual del Avión', 
+      name: 'Manual del Piloto Privado', 
       type: 'PDF', 
-      size: '3.8 MB',
-      filePath: '/documentos/Manual-Avion.pdf'
-    },
-    { 
-      id: 4, 
-      name: 'Manual de Maniobras', 
-      type: 'PDF', 
-      size: '2.1 MB',
-      filePath: '/documentos/Manual-Maniobras.pdf'
-    },
-    { 
-      id: 5, 
-      name: 'LAR 91 y 61', 
-      type: 'PDF', 
-      size: '1.5 MB',
-      filePath: '/documentos/LAR-91-61.pdf'
-    },
-    { 
-      id: 6, 
-      name: 'Otros', 
-      type: 'PDF', 
-      size: '1.0 MB',
-      filePath: '/documentos/Otros.pdf'
+      size: '18.89 MB',
+      filePath: '/documentos/MANUAL DEL PILOTO PRIVADO.pdf'
     },
   ];
 
   const handleDownload = (resource) => {
+    // Codificar la URL para manejar espacios y caracteres especiales
+    const encodedPath = encodeURI(resource.filePath);
     // Crear un link temporal para descargar el archivo
     const link = document.createElement('a');
-    link.href = resource.filePath;
+    link.href = encodedPath;
     link.download = `${resource.name}.pdf`;
     document.body.appendChild(link);
     link.click();
@@ -66,12 +47,9 @@ const RecursosAdicionales = ({ isAuthenticated }) => {
           <h2>📚 Biblioteca de Recursos</h2>
           <p>En esta sección encontrarás:</p>
           <ul>
-            <li>AIP</li>
-            <li>Manual Operativo</li>
-            <li>Manual del Avión</li>
-            <li>Manual de Maniobras</li>
-            <li>LAR 91 y 61</li>
-            <li>Otros recursos</li>
+            <li>Código Aeronáutico</li>
+            <li>LAR 61 - Licencias</li>
+            <li>Manual del Piloto Privado</li>
           </ul>
           <p className="auth-prompt">Inicia sesión para acceder a los recursos adicionales</p>
           <Link to="/login" className="btn-primary">Iniciar Sesión</Link>
@@ -101,8 +79,8 @@ const RecursosAdicionales = ({ isAuthenticated }) => {
                   </div>
                 </div>
                 <a 
-                  href={resource.filePath}
-                  download
+                  href={encodeURI(resource.filePath)}
+                  download={`${resource.name}.pdf`}
                   className="btn-download"
                   onClick={(e) => {
                     e.preventDefault();
