@@ -98,11 +98,12 @@ const EstudioTeorico = ({ isAuthenticated, userRole }) => {
             </div>
             <div className="manual-button-container">
               <a 
-                href="/documentos/MANUAL PILOTO PRIVADO 2026-CON VIDEOS FINAL.pdf"
-                download="MANUAL-PILOTO-PRIVADO-2026-CON-VIDEOS-FINAL.pdf"
+                href="https://drive.google.com/file/d/1XV8k28eAdedv3B11czKTtq68R0MEJPxW/view?usp=drive_link"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="btn-primary"
               >
-                Descargar Manual
+                Ver Manual en Google Drive
               </a>
             </div>
           </div>
