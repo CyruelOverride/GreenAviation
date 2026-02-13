@@ -53,7 +53,7 @@ const Home = () => {
     },
     {
       id: 4,
-      image: '/Imagenes/Instruccion 5.jpg',
+      image: '/Imagenes/Instruccion 5.jpeg',
       icon: '🎯',
       title: 'Examen Pre-Solo',
       description: 'Accede al examen Pre-Solo una vez completado el 100% del curso. Evaluación completa para certificar tu preparación antes del vuelo.'

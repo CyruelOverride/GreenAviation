@@ -30,7 +30,7 @@ const EstudioTeorico = ({ isAuthenticated, userRole }) => {
     { 
       id: 1, 
       title: 'Videos Curso Teórico', 
-      driveLink: 'https://drive.google.com/drive/folders/TU_FOLDER_ID_TEORICO',
+      driveLink: 'https://drive.google.com/drive/folders/11LNAVWA0G2FrWJO6gB0UbA-EDIoODQJn?usp=drive_link',
       icon: '📚'
     },
     { 
@@ -98,8 +98,8 @@ const EstudioTeorico = ({ isAuthenticated, userRole }) => {
             </div>
             <div className="manual-button-container">
               <a 
-                href="/documentos/MANUAL DEL PILOTO PRIVADO.pdf"
-                download="Manual-del-Piloto-Privado.pdf"
+                href="/documentos/MANUAL PILOTO PRIVADO 2026-CON VIDEOS FINAL.pdf"
+                download="MANUAL-PILOTO-PRIVADO-2026-CON-VIDEOS-FINAL.pdf"
                 className="btn-primary"
               >
                 Descargar Manual
