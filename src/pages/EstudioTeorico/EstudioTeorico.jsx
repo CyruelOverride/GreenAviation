@@ -87,7 +87,7 @@ const EstudioTeorico = ({ isAuthenticated, userRole }) => {
           <div className="manual-card">
             <div className="manual-icon">
               <img 
-                src="/Imagenes/Logo manual.png" 
+                src="/Imagenes/Logo manual aviacion.jpeg" 
                 alt="Logo Manual Piloto Privado"
                 className="manual-logo"
               />
