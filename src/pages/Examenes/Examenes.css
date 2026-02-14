@@ -16,7 +16,7 @@
 
 .info-card-unauthenticated h2 {
   font-size: 28px;
-  color: #1e40af;
+  color: #1e3a8a;
   margin-bottom: 20px;
   text-align: center;
 }
@@ -46,7 +46,7 @@
   content: '✓';
   position: absolute;
   left: 0;
-  color: #3b82f6;
+  color: #1d4ed8;
   font-weight: bold;
   font-size: 18px;
 }
@@ -67,7 +67,7 @@
 
 .page-title {
   font-size: 32px;
-  color: #1e40af;
+  color: #1e3a8a;
   margin-bottom: 30px;
   font-weight: bold;
 }
@@ -113,7 +113,7 @@
   padding: 15px;
   background: #f9fafb;
   border-radius: 6px;
-  border-left: 4px solid #3b82f6;
+  border-left: 4px solid #1d4ed8;
 }
 
 .exams-grid {
@@ -131,8 +131,8 @@
 }
 
 .exam-card:hover:not(.locked) {
-  border-color: #3b82f6;
-  box-shadow: 0 4px 8px rgba(59, 130, 246, 0.1);
+  border-color: #1d4ed8;
+  box-shadow: 0 4px 8px rgba(29, 78, 216, 0.1);
 }
 
 .exam-card.locked {
@@ -175,7 +175,7 @@
 }
 
 .btn-primary {
-  background-color: #1e40af;
+  background-color: #1e3a8a;
   color: white;
 }
 
@@ -286,7 +286,7 @@
 }
 
 .answer-option:hover {
-  border-color: #3b82f6;
+  border-color: #1d4ed8;
   background: #f0fdf4;
 }
 
@@ -348,7 +348,7 @@
 .score-value {
   font-size: 32px;
   font-weight: bold;
-  color: #3b82f6;
+  color: #1d4ed8;
 }
 
 .score-label {
@@ -394,7 +394,7 @@
 }
 
 .stat-item.correct {
-  background: #dbeafe;
+  background: #bfdbfe;
 }
 
 .stat-item.incorrect {
@@ -402,7 +402,7 @@
 }
 
 .stat-item.score {
-  background: #dbeafe;
+  background: #bfdbfe;
 }
 
 .stat-label {
@@ -421,7 +421,7 @@
 }
 
 .stat-item.correct .stat-value {
-  color: #2563eb;
+  color: #1d4ed8;
 }
 
 .stat-item.incorrect .stat-value {
@@ -429,7 +429,7 @@
 }
 
 .stat-item.score .stat-value {
-  color: #1e40af;
+  color: #1e3a8a;
 }
 
 .results-details {
@@ -455,7 +455,7 @@
 
 .result-item.correct {
   background: #f0fdf4;
-  border-color: #3b82f6;
+  border-color: #1d4ed8;
 }
 
 .result-item.incorrect {
@@ -484,8 +484,8 @@
 }
 
 .correct-badge {
-  background: #dbeafe;
-  color: #2563eb;
+  background: #bfdbfe;
+  color: #1d4ed8;
 }
 
 .incorrect-badge {
@@ -528,7 +528,7 @@
 }
 
 .answer-value.correct {
-  color: #2563eb;
+  color: #1d4ed8;
 }
 
 .answer-value.incorrect {
@@ -540,8 +540,8 @@
 }
 
 .success-message {
-  background: #dbeafe;
-  border: 2px solid #3b82f6;
+  background: #bfdbfe;
+  border: 2px solid #1d4ed8;
   border-radius: 8px;
   padding: 20px;
   display: flex;
@@ -551,7 +551,7 @@
 
 .success-icon {
   font-size: 32px;
-  color: #2563eb;
+  color: #1d4ed8;
   font-weight: bold;
 }
 

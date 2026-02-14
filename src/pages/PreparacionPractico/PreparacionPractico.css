@@ -16,7 +16,7 @@
 
 .info-card-unauthenticated h2 {
   font-size: 28px;
-  color: #1e40af;
+  color: #1e3a8a;
   margin-bottom: 20px;
   text-align: center;
 }
@@ -46,7 +46,7 @@
   content: '✓';
   position: absolute;
   left: 0;
-  color: #3b82f6;
+  color: #1d4ed8;
   font-weight: bold;
   font-size: 18px;
 }
@@ -67,7 +67,7 @@
 
 .page-title {
   font-size: 32px;
-  color: #1e40af;
+  color: #1e3a8a;
   margin-bottom: 10px;
   font-weight: bold;
 }
@@ -159,7 +159,7 @@
 
 .btn-download {
   padding: 10px 20px;
-  background-color: #1e40af;
+  background-color: #1e3a8a;
   color: white;
   border: none;
   border-radius: 6px;
@@ -261,13 +261,13 @@
   gap: 20px;
   align-items: center;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  border-left: 4px solid #3b82f6;
+  border-left: 4px solid #1d4ed8;
 }
 
 .tip-number {
   width: 40px;
   height: 40px;
-  background: #3b82f6;
+  background: #1d4ed8;
   color: white;
   border-radius: 50%;
   display: flex;

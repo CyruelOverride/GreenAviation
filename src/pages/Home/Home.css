@@ -66,7 +66,7 @@
 
 .hero-subtitle {
   font-size: 20px;
-  color: #3b82f6;
+  color: #ffffff;
   margin-bottom: 25px;
   font-weight: 600;
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
@@ -88,7 +88,7 @@
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%);
+  background: linear-gradient(135deg, #1d4ed8 0%, #1d4ed8 100%);
   color: white;
   border: none;
   padding: 18px 40px;
@@ -99,7 +99,7 @@
   text-transform: none;
   letter-spacing: 0.5px;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
+  box-shadow: 0 4px 15px rgba(29, 78, 216, 0.4);
   font-family: 'Montserrat', sans-serif;
   text-decoration: none;
   display: inline-block;
@@ -107,14 +107,14 @@
 
 .btn-primary:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(59, 130, 246, 0.6);
-  background: linear-gradient(135deg, #1d4ed8 0%, #2563eb 100%);
+  box-shadow: 0 6px 20px rgba(29, 78, 216, 0.6);
+  background: linear-gradient(135deg, #1d4ed8 0%, #1d4ed8 100%);
 }
 
 .btn-secondary {
   background: rgba(255, 255, 255, 0.95);
-  color: #1e40af;
-  border: 2px solid #3b82f6;
+  color: #1e3a8a;
+  border: 2px solid #1d4ed8;
   padding: 18px 40px;
   font-size: 18px;
   font-weight: 600;
@@ -130,10 +130,10 @@
 }
 
 .btn-secondary:hover {
-  background: #3b82f6;
+  background: #1d4ed8;
   color: white;
   transform: translateY(-2px);
-  box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+  box-shadow: 0 4px 15px rgba(29, 78, 216, 0.3);
 }
 
 .hero-features {
@@ -152,13 +152,13 @@
 }
 
 .feature-icon {
-  color: #3b82f6;
+  color: #1d4ed8;
   font-weight: bold;
   font-size: 18px;
 }
 
 .btn-purchase {
-  background-color: #3b82f6;
+  background-color: #1d4ed8;
   color: white;
   border: none;
   padding: 14px 32px;
@@ -173,7 +173,7 @@
 }
 
 .btn-purchase:hover {
-  background-color: #2563eb;
+  background-color: #1d4ed8;
 }
 
 .pricing {
@@ -365,7 +365,7 @@
   width: 12px;
   height: 12px;
   border-radius: 50%;
-  border: 2px solid #3b82f6;
+  border: 2px solid #1d4ed8;
   background-color: transparent;
   cursor: pointer;
   transition: all 0.3s ease;
@@ -373,12 +373,12 @@
 }
 
 .carousel-indicator:hover {
-  background-color: #93c5fd;
+  background-color: #60a5fa;
   transform: scale(1.2);
 }
 
 .carousel-indicator.active {
-  background-color: #3b82f6;
+  background-color: #1d4ed8;
   width: 32px;
   border-radius: 6px;
 }
@@ -452,7 +452,7 @@
   text-align: center;
   margin-bottom: 60px;
   font-family: 'Montserrat', sans-serif;
-  color: #1e40af;
+  color: #1e3a8a;
 }
 
 .benefits-grid {
@@ -504,8 +504,8 @@
 
 .benefit-card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 10px 30px rgba(59, 130, 246, 0.15);
-  border-color: #3b82f6;
+  box-shadow: 0 10px 30px rgba(29, 78, 216, 0.15);
+  border-color: #1d4ed8;
 }
 
 .benefit-card:hover .benefit-overlay {
@@ -565,16 +565,16 @@
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  background-color: #1e40af;
+  background-color: #1e3a8a;
   color: #ffffff;
   text-decoration: none;
   transition: all 0.3s ease;
 }
 
 .social-icon:hover {
-  background-color: #3b82f6;
+  background-color: #1d4ed8;
   transform: translateY(-3px);
-  box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3);
+  box-shadow: 0 4px 8px rgba(29, 78, 216, 0.3);
 }
 
 .social-icon svg {
@@ -586,7 +586,7 @@
   font-family: 'Montserrat', sans-serif;
   font-size: 36px;
   font-weight: 700;
-  color: #1e40af;
+  color: #1e3a8a;
   margin-bottom: 20px;
 }
 
@@ -655,7 +655,7 @@
 .course-content h3 {
   font-size: 28px;
   font-weight: bold;
-  color: #1e40af;
+  color: #1e3a8a;
   margin-bottom: 20px;
 }
 
@@ -1018,7 +1018,7 @@
 .video-info h3 {
   font-family: 'Montserrat', sans-serif;
   font-size: 28px;
-  color: #1e40af;
+  color: #1e3a8a;
   margin-bottom: 15px;
   font-weight: 700;
 }

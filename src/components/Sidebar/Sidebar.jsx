@@ -31,18 +31,6 @@ const Sidebar = ({ userRole, isAuthenticated, isOpen, onClose }) => {
       {isOpen && <div className="sidebar-overlay" onClick={onClose}></div>}
       <aside className={`sidebar ${isOpen ? 'open' : ''}`}>
       <div className="sidebar-content">
-        <div className="course-card">
-          <div className="course-thumbnail">
-            <img 
-              src="https://via.placeholder.com/150x100/3b82f6/ffffff?text=Curso+Piloto" 
-              alt="Curso de Piloto"
-            />
-          </div>
-          <div className="course-info">
-            <h3>Curso de Piloto Privado</h3>
-          </div>
-        </div>
-
         <nav className="sidebar-nav">
           <Link 
             to="/" 

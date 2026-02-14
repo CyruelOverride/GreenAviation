@@ -4,7 +4,7 @@
   align-items: center;
   min-height: calc(100vh - 60px);
   padding: 20px;
-  background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+  background: linear-gradient(135deg, #bfdbfe 0%, #bfdbfe 100%);
 }
 
 .login-card {
@@ -29,7 +29,7 @@
 
 .login-header h1 {
   font-size: 28px;
-  color: #1e40af;
+  color: #1e3a8a;
   margin-bottom: 8px;
 }
 
@@ -66,13 +66,13 @@
 
 .form-group input:focus {
   outline: none;
-  border-color: #3b82f6;
+  border-color: #1d4ed8;
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
 .btn-login-submit {
   padding: 12px;
-  background-color: #1e40af;
+  background-color: #1e3a8a;
   color: white;
   border: none;
   border-radius: 6px;
@@ -99,7 +99,7 @@
 }
 
 .demo-info {
-  color: #3b82f6;
+  color: #1d4ed8;
   font-weight: 500;
   margin-top: 10px;
 }
