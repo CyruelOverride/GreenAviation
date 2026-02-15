@@ -6,6 +6,9 @@ const Header = ({ isAuthenticated, setIsAuthenticated, userRole, toggleSidebar, 
   const navigate = useNavigate();
 
   const handleLogout = () => {
+    // Limpiar token y datos del usuario
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
     setIsAuthenticated(false);
     navigate('/');
   };

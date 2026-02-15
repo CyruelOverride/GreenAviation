@@ -1,40 +1,73 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import * as XLSX from 'xlsx';
+import { userAPI } from '../../services/api';
 import './GestionAlumnos.css';
 
 const GestionAlumnos = ({ userRole, isAuthenticated }) => {
-  const [students] = useState([
-    { id: 1, name: 'Juan Pérez', email: 'juan@email.com', progress: 65, status: 'Activo' },
-    { id: 2, name: 'María García', email: 'maria@email.com', progress: 80, status: 'Activo' },
-    { id: 3, name: 'Carlos López', email: 'carlos@email.com', progress: 45, status: 'Activo' },
-    { id: 4, name: 'Ana Martínez', email: 'ana@email.com', progress: 90, status: 'Activo' },
-  ]);
+  const [students, setStudents] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [selectedStudent, setSelectedStudent] = useState(null);
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [createFormData, setCreateFormData] = useState({
+    email: '',
+    password: '',
+    role: 'alumno',
+    nombre: '',
+    apellido: '',
+    cedula: '',
+    numeroTelefono: '',
+    edad: '',
+    fechaInicioCurso: new Date().toISOString().split('T')[0],
+    estado: 'Cursando'
+  });
+  const [createLoading, setCreateLoading] = useState(false);
+
+  // Cargar estudiantes
+  useEffect(() => {
+    if (isAuthenticated && userRole === 'admin') {
+      loadStudents();
+    }
+  }, [isAuthenticated, userRole]);
+
+  const loadStudents = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const response = await userAPI.getAll({ role: 'alumno' });
+      if (response.success) {
+        setStudents(response.data.users || []);
+      }
+    } catch (err) {
+      setError(err.message || 'Error al cargar los alumnos');
+      console.error('Error loading students:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleExport = () => {
-    // Preparar datos para exportación
     const data = students.map(student => ({
-      'ID': student.id,
-      'Nombre': student.name,
+      'ID': student.id || student._id,
+      'Nombre': `${student.nombre || ''} ${student.apellido || ''}`.trim(),
       'Email': student.email,
-      'Progreso (%)': student.progress,
-      'Estado': student.status
+      'Cédula': student.cedula || '',
+      'Teléfono': student.numeroTelefono || '',
+      'Edad': student.edad || '',
+      'Progreso (%)': student.progreso || 0,
+      'Estado': student.estado || 'Cursando',
+      'Fecha Inicio': student.fechaInicioCurso ? new Date(student.fechaInicioCurso).toLocaleDateString() : ''
     }));
 
-    // Crear workbook y worksheet
     const ws = XLSX.utils.json_to_sheet(data);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, 'Alumnos');
 
-    // Generar nombre de archivo con fecha
     const fecha = new Date().toISOString().split('T')[0];
     const fileName = `alumnos_${fecha}.xlsx`;
-
-    // Descargar archivo
     XLSX.writeFile(wb, fileName);
   };
-
-  const [selectedStudent, setSelectedStudent] = useState(null);
 
   const handleViewDetails = (student) => {
     setSelectedStudent(student);
@@ -45,29 +78,68 @@ const GestionAlumnos = ({ userRole, isAuthenticated }) => {
   };
 
   const handleExportStudent = (student) => {
-    // Preparar datos del alumno con información completa
     const data = [{
-      'ID': student.id,
-      'Nombre Completo': student.name,
+      'ID': student.id || student._id,
+      'Nombre': student.nombre || '',
+      'Apellido': student.apellido || '',
+      'Nombre Completo': `${student.nombre || ''} ${student.apellido || ''}`.trim(),
       'Email': student.email,
-      'Progreso (%)': student.progress,
-      'Estado': student.status,
-      'Curso': 'Piloto Privado',
-      'Fecha de Inscripción': '15/01/2024',
-      'Último Acceso': '20/01/2024'
+      'Cédula': student.cedula || '',
+      'Teléfono': student.numeroTelefono || '',
+      'Edad': student.edad || '',
+      'Progreso (%)': student.progreso || 0,
+      'Estado': student.estado || 'Cursando',
+      'Curso': student.curso || 'Piloto Privado',
+      'Fecha de Inscripción': student.fechaInicioCurso ? new Date(student.fechaInicioCurso).toLocaleDateString() : '',
+      'Último Acceso': student.ultimoAcceso ? new Date(student.ultimoAcceso).toLocaleDateString() : ''
     }];
 
-    // Crear workbook y worksheet
     const ws = XLSX.utils.json_to_sheet(data);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, 'Alumno');
 
-    // Generar nombre de archivo con el nombre del alumno
-    const nombreArchivo = student.name.replace(/\s+/g, '_').toLowerCase();
+    const nombreArchivo = `${student.nombre || 'alumno'}_${student.apellido || ''}`.replace(/\s+/g, '_').toLowerCase();
     const fileName = `alumno_${nombreArchivo}.xlsx`;
-
-    // Descargar archivo
     XLSX.writeFile(wb, fileName);
+  };
+
+  const handleCreateUser = async (e) => {
+    e.preventDefault();
+    try {
+      setCreateLoading(true);
+      const response = await userAPI.create(createFormData);
+      
+      if (response.success) {
+        alert('Usuario creado exitosamente');
+        setShowCreateModal(false);
+        setCreateFormData({
+          email: '',
+          password: '',
+          role: 'alumno',
+          nombre: '',
+          apellido: '',
+          cedula: '',
+          numeroTelefono: '',
+          edad: '',
+          fechaInicioCurso: new Date().toISOString().split('T')[0],
+          estado: 'Cursando'
+        });
+        loadStudents();
+      }
+    } catch (err) {
+      alert(err.message || 'Error al crear usuario');
+      console.error('Error creating user:', err);
+    } finally {
+      setCreateLoading(false);
+    }
+  };
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setCreateFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
   };
 
   if (!isAuthenticated) {
@@ -101,42 +173,15 @@ const GestionAlumnos = ({ userRole, isAuthenticated }) => {
             <div className="profile-info">
               <div className="info-item">
                 <label>Nombre:</label>
-                <span>Juan Pérez</span>
+                <span>Cargando...</span>
               </div>
               <div className="info-item">
                 <label>Email:</label>
-                <span>juan@email.com</span>
+                <span>Cargando...</span>
               </div>
               <div className="info-item">
                 <label>Curso:</label>
                 <span>Piloto Privado</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="profile-card">
-            <h2>Progreso Académico</h2>
-            <div className="progress-info">
-              <div className="progress-item">
-                <span>Progreso General:</span>
-                <span className="progress-value">65%</span>
-              </div>
-              <div className="progress-bar-container">
-                <div className="progress-bar" style={{ width: '65%' }}></div>
-              </div>
-            </div>
-          </div>
-
-          <div className="profile-card">
-            <h2>Registros de Vuelo</h2>
-            <div className="flight-records">
-              <div className="flight-record">
-                <span>Vuelo 1 - 15/01/2024</span>
-                <button className="btn-secondary">Ver Detalles</button>
-              </div>
-              <div className="flight-record">
-                <span>Vuelo 2 - 20/01/2024</span>
-                <button className="btn-secondary">Ver Detalles</button>
               </div>
             </div>
           </div>
@@ -149,129 +194,301 @@ const GestionAlumnos = ({ userRole, isAuthenticated }) => {
     <div className="gestion-alumnos">
       <div className="page-header">
         <h1 className="page-title">Gestión de Alumnos</h1>
-        <button className="btn-primary" onClick={handleExport}>
-          Exportar a Excel
-        </button>
+        <div className="header-actions">
+          <button 
+            className="btn-primary" 
+            onClick={() => setShowCreateModal(true)}
+          >
+            + Nuevo Usuario
+          </button>
+          <button className="btn-primary" onClick={handleExport}>
+            Exportar a Excel
+          </button>
+        </div>
       </div>
 
-      <div className="students-table-container">
-        <table className="students-table">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Nombre</th>
-              <th>Email</th>
-              <th>Progreso</th>
-              <th>Estado</th>
-              <th>Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            {students.map(student => (
-              <tr key={student.id}>
-                <td>{student.id}</td>
-                <td>{student.name}</td>
-                <td>{student.email}</td>
-                <td>
-                  <div className="progress-cell">
-                    <div className="progress-bar-container">
-                      <div 
-                        className="progress-bar" 
-                        style={{ width: `${student.progress}%` }}
-                      ></div>
-                    </div>
-                    <span>{student.progress}%</span>
-                  </div>
-                </td>
-                <td>
-                  <span className={`status-badge ${student.status.toLowerCase()}`}>
-                    {student.status}
-                  </span>
-                </td>
-                <td>
-                  <div className="action-buttons">
-                    <button 
-                      className="btn-secondary"
-                      onClick={() => handleViewDetails(student)}
-                    >
-                      Ver Información Completa
-                    </button>
-                    <button 
-                      className="btn-export"
-                      onClick={() => handleExportStudent(student)}
-                    >
-                      Exportar a Excel
-                    </button>
-                  </div>
-                </td>
+      {error && (
+        <div className="error-message" style={{ 
+          padding: '15px', 
+          background: '#fee', 
+          color: '#c33', 
+          borderRadius: '8px', 
+          marginBottom: '20px' 
+        }}>
+          {error}
+        </div>
+      )}
+
+      {loading ? (
+        <div style={{ textAlign: 'center', padding: '40px' }}>
+          <p>Cargando alumnos...</p>
+        </div>
+      ) : (
+        <div className="students-table-container">
+          <table className="students-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Nombre</th>
+                <th>Email</th>
+                <th>Cédula</th>
+                <th>Teléfono</th>
+                <th>Progreso</th>
+                <th>Estado</th>
+                <th>Acciones</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-
-      <div className="admin-sections">
-        <div className="admin-card">
-          <h2>Historial Académico</h2>
-          <p>Accede al historial completo de todos los alumnos</p>
-          <button className="btn-primary">Ver Historial Completo</button>
+            </thead>
+            <tbody>
+              {students.length === 0 ? (
+                <tr>
+                  <td colSpan="8" style={{ textAlign: 'center', padding: '20px' }}>
+                    No hay alumnos registrados
+                  </td>
+                </tr>
+              ) : (
+                students.map(student => (
+                  <tr key={student._id || student.id}>
+                    <td>{student._id?.toString().substring(0, 8) || student.id}</td>
+                    <td>{`${student.nombre || ''} ${student.apellido || ''}`.trim() || 'Sin nombre'}</td>
+                    <td>{student.email}</td>
+                    <td>{student.cedula || '-'}</td>
+                    <td>{student.numeroTelefono || '-'}</td>
+                    <td>
+                      <div className="progress-cell">
+                        <div className="progress-bar-container">
+                          <div 
+                            className="progress-bar" 
+                            style={{ width: `${student.progreso || 0}%` }}
+                          ></div>
+                        </div>
+                        <span>{student.progreso || 0}%</span>
+                      </div>
+                    </td>
+                    <td>
+                      <span className={`status-badge ${(student.estado || 'Cursando').toLowerCase()}`}>
+                        {student.estado || 'Cursando'}
+                      </span>
+                    </td>
+                    <td>
+                      <div className="action-buttons">
+                        <button 
+                          className="btn-secondary"
+                          onClick={() => handleViewDetails(student)}
+                        >
+                          Ver Detalles
+                        </button>
+                        <button 
+                          className="btn-export"
+                          onClick={() => handleExportStudent(student)}
+                        >
+                          Exportar
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
         </div>
+      )}
 
-        <div className="admin-card">
-          <h2>Registros de Vuelo</h2>
-          <p>Gestiona y consulta los registros de vuelo de los alumnos</p>
-          <button className="btn-primary">Ver Registros</button>
+      {/* Modal de Crear Usuario */}
+      {showCreateModal && (
+        <div className="student-modal">
+          <div className="modal-content" style={{ maxWidth: '600px' }}>
+            <div className="modal-header">
+              <h2>Crear Nuevo Usuario</h2>
+              <button className="modal-close" onClick={() => setShowCreateModal(false)}>×</button>
+            </div>
+            <form onSubmit={handleCreateUser} className="modal-body">
+              <div className="form-group">
+                <label>Email (Gmail) *</label>
+                <input
+                  type="email"
+                  name="email"
+                  value={createFormData.email}
+                  onChange={handleInputChange}
+                  required
+                  placeholder="usuario@gmail.com"
+                />
+              </div>
+              <div className="form-group">
+                <label>Contraseña *</label>
+                <input
+                  type="password"
+                  name="password"
+                  value={createFormData.password}
+                  onChange={handleInputChange}
+                  required
+                  minLength="6"
+                  placeholder="Mínimo 6 caracteres"
+                />
+              </div>
+              <div className="form-row">
+                <div className="form-group">
+                  <label>Nombre *</label>
+                  <input
+                    type="text"
+                    name="nombre"
+                    value={createFormData.nombre}
+                    onChange={handleInputChange}
+                    required
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Apellido *</label>
+                  <input
+                    type="text"
+                    name="apellido"
+                    value={createFormData.apellido}
+                    onChange={handleInputChange}
+                    required
+                  />
+                </div>
+              </div>
+              <div className="form-row">
+                <div className="form-group">
+                  <label>Cédula</label>
+                  <input
+                    type="text"
+                    name="cedula"
+                    value={createFormData.cedula}
+                    onChange={handleInputChange}
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Teléfono</label>
+                  <input
+                    type="text"
+                    name="numeroTelefono"
+                    value={createFormData.numeroTelefono}
+                    onChange={handleInputChange}
+                  />
+                </div>
+              </div>
+              <div className="form-row">
+                <div className="form-group">
+                  <label>Edad</label>
+                  <input
+                    type="number"
+                    name="edad"
+                    value={createFormData.edad}
+                    onChange={handleInputChange}
+                    min="16"
+                    max="100"
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Estado</label>
+                  <select
+                    name="estado"
+                    value={createFormData.estado}
+                    onChange={handleInputChange}
+                  >
+                    <option value="Cursando">Cursando</option>
+                    <option value="Finalizado">Finalizado</option>
+                  </select>
+                </div>
+              </div>
+              <div className="form-group">
+                <label>Fecha de Inicio del Curso</label>
+                <input
+                  type="date"
+                  name="fechaInicioCurso"
+                  value={createFormData.fechaInicioCurso}
+                  onChange={handleInputChange}
+                />
+              </div>
+              <div className="modal-footer">
+                <button 
+                  type="button" 
+                  className="btn-secondary" 
+                  onClick={() => setShowCreateModal(false)}
+                  disabled={createLoading}
+                >
+                  Cancelar
+                </button>
+                <button 
+                  type="submit" 
+                  className="btn-primary"
+                  disabled={createLoading}
+                >
+                  {createLoading ? 'Creando...' : 'Crear Usuario'}
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
+      )}
 
-        <div className="admin-card">
-          <h2>Integración CloudAhoy</h2>
-          <p>Conecta con la API de CloudAhoy para gestión de datos de vuelo</p>
-          <button className="btn-secondary">Configurar Integración</button>
-        </div>
-      </div>
-
+      {/* Modal de Detalles */}
       {selectedStudent && (
         <div className="student-modal">
           <div className="modal-content">
             <div className="modal-header">
-              <h2>Información Completa - {selectedStudent.name}</h2>
+              <h2>Información Completa - {`${selectedStudent.nombre || ''} ${selectedStudent.apellido || ''}`.trim() || 'Alumno'}</h2>
               <button className="modal-close" onClick={handleCloseDetails}>×</button>
             </div>
             <div className="modal-body">
               <div className="student-details">
                 <div className="detail-row">
                   <label>ID:</label>
-                  <span>{selectedStudent.id}</span>
+                  <span>{selectedStudent._id?.toString() || selectedStudent.id}</span>
                 </div>
                 <div className="detail-row">
-                  <label>Nombre Completo:</label>
-                  <span>{selectedStudent.name}</span>
+                  <label>Nombre:</label>
+                  <span>{selectedStudent.nombre || '-'}</span>
+                </div>
+                <div className="detail-row">
+                  <label>Apellido:</label>
+                  <span>{selectedStudent.apellido || '-'}</span>
                 </div>
                 <div className="detail-row">
                   <label>Email:</label>
                   <span>{selectedStudent.email}</span>
                 </div>
                 <div className="detail-row">
+                  <label>Cédula:</label>
+                  <span>{selectedStudent.cedula || '-'}</span>
+                </div>
+                <div className="detail-row">
+                  <label>Teléfono:</label>
+                  <span>{selectedStudent.numeroTelefono || '-'}</span>
+                </div>
+                <div className="detail-row">
+                  <label>Edad:</label>
+                  <span>{selectedStudent.edad || '-'}</span>
+                </div>
+                <div className="detail-row">
                   <label>Progreso:</label>
-                  <span>{selectedStudent.progress}%</span>
+                  <span>{selectedStudent.progreso || 0}%</span>
                 </div>
                 <div className="detail-row">
                   <label>Estado:</label>
-                  <span className={`status-badge ${selectedStudent.status.toLowerCase()}`}>
-                    {selectedStudent.status}
+                  <span className={`status-badge ${(selectedStudent.estado || 'Cursando').toLowerCase()}`}>
+                    {selectedStudent.estado || 'Cursando'}
                   </span>
                 </div>
                 <div className="detail-row">
                   <label>Curso:</label>
-                  <span>Piloto Privado</span>
+                  <span>{selectedStudent.curso || 'Piloto Privado'}</span>
                 </div>
                 <div className="detail-row">
                   <label>Fecha de Inscripción:</label>
-                  <span>15/01/2024</span>
+                  <span>
+                    {selectedStudent.fechaInicioCurso 
+                      ? new Date(selectedStudent.fechaInicioCurso).toLocaleDateString() 
+                      : '-'}
+                  </span>
                 </div>
                 <div className="detail-row">
                   <label>Último Acceso:</label>
-                  <span>20/01/2024</span>
+                  <span>
+                    {selectedStudent.ultimoAcceso 
+                      ? new Date(selectedStudent.ultimoAcceso).toLocaleDateString() 
+                      : '-'}
+                  </span>
                 </div>
               </div>
             </div>
@@ -289,4 +506,3 @@ const GestionAlumnos = ({ userRole, isAuthenticated }) => {
 };
 
 export default GestionAlumnos;
-

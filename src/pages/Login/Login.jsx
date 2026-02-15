@@ -1,31 +1,44 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { authAPI } from '../../services/api';
 import './Login.css';
 
 const Login = ({ setIsAuthenticated, setUserRole }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
   const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    // Credenciales específicas
-    const adminEmail = 'GreenAviation@gmail.com';
-    const adminPassword = 'GreenAviation2026!';
-    const alumnoEmail = 'AlumnoPrueba@gmail.com';
-    const alumnoPassword = 'alumno123';
-    
-    if (email === adminEmail && password === adminPassword) {
-      setIsAuthenticated(true);
-      setUserRole('admin');
-      navigate('/estudio-teorico');
-    } else if (email === alumnoEmail && password === alumnoPassword) {
-      setIsAuthenticated(true);
-      setUserRole('alumno');
-      navigate('/estudio-teorico');
-    } else {
-      alert('Credenciales incorrectas. Por favor, verifica tu email y contraseña.');
+    setLoading(true);
+    setError(null);
+
+    try {
+      // Llamar al backend para autenticar
+      const response = await authAPI.login(email, password);
+
+      if (response.success && response.data) {
+        // Guardar el token JWT en localStorage
+        localStorage.setItem('token', response.data.token);
+        
+        // Guardar información del usuario
+        const user = response.data.user;
+        setIsAuthenticated(true);
+        setUserRole(user.role);
+        
+        // Opcional: guardar más datos del usuario en localStorage
+        localStorage.setItem('user', JSON.stringify(user));
+        
+        // Redirigir al usuario
+        navigate('/estudio-teorico');
+      }
+    } catch (err) {
+      setError(err.message || 'Credenciales incorrectas. Por favor, verifica tu email y contraseña.');
+      console.error('Login error:', err);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -60,8 +73,23 @@ const Login = ({ setIsAuthenticated, setUserRole }) => {
               required
             />
           </div>
-          <button type="submit" className="btn-login-submit">
-            Iniciar Sesión
+          {error && (
+            <div style={{ 
+              padding: '12px', 
+              background: '#fee', 
+              color: '#c33', 
+              borderRadius: '6px', 
+              fontSize: '14px' 
+            }}>
+              {error}
+            </div>
+          )}
+          <button 
+            type="submit" 
+            className="btn-login-submit"
+            disabled={loading}
+          >
+            {loading ? 'Iniciando sesión...' : 'Iniciar Sesión'}
           </button>
         </form>
         <div className="login-footer">
