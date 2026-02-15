@@ -134,13 +134,34 @@ const Sidebar = ({ userRole, isAuthenticated, isOpen, onClose }) => {
           </div>
 
           {userRole === 'admin' && (
+            <>
+              <Link 
+                to="/gestion-alumnos" 
+                className={`nav-item ${isActive('/gestion-alumnos') ? 'active' : ''}`}
+                onClick={handleLinkClick}
+              >
+                <span className="nav-icon">👥</span>
+                <span>Gestión de Alumnos</span>
+              </Link>
+              <Link 
+                to="/gestion-vuelos" 
+                className={`nav-item ${isActive('/gestion-vuelos') ? 'active' : ''}`}
+                onClick={handleLinkClick}
+              >
+                <span className="nav-icon">✈️</span>
+                <span>Gestión de Vuelos</span>
+              </Link>
+            </>
+          )}
+
+          {userRole === 'alumno' && (
             <Link 
-              to="/gestion-alumnos" 
-              className={`nav-item ${isActive('/gestion-alumnos') ? 'active' : ''}`}
+              to="/mi-perfil" 
+              className={`nav-item ${isActive('/mi-perfil') ? 'active' : ''}`}
               onClick={handleLinkClick}
             >
-              <span className="nav-icon">👥</span>
-              <span>Gestión de Alumnos</span>
+              <span className="nav-icon">👤</span>
+              <span>Mi Perfil</span>
             </Link>
           )}
 

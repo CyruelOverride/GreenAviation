@@ -6,6 +6,8 @@ import Home from './pages/Home/Home';
 import EstudioTeorico from './pages/EstudioTeorico/EstudioTeorico';
 import Examenes from './pages/Examenes/Examenes';
 import GestionAlumnos from './pages/GestionAlumnos/GestionAlumnos';
+import GestionVuelos from './pages/GestionVuelos/GestionVuelos';
+import MiPerfil from './pages/MiPerfil/MiPerfil';
 import RecursosAdicionales from './pages/RecursosAdicionales/RecursosAdicionales';
 import ClasesOnline from './pages/ClasesOnline/ClasesOnline';
 import Login from './pages/Login/Login';
@@ -111,6 +113,14 @@ function App() {
               <Route 
                 path="/gestion-alumnos" 
                 element={<GestionAlumnos userRole={userRole} isAuthenticated={isAuthenticated} />}
+              />
+              <Route 
+                path="/gestion-vuelos" 
+                element={<GestionVuelos userRole={userRole} isAuthenticated={isAuthenticated} />}
+              />
+              <Route 
+                path="/mi-perfil" 
+                element={<MiPerfil userRole={userRole} isAuthenticated={isAuthenticated} />}
               />
               <Route 
                 path="/recursos-adicionales" 

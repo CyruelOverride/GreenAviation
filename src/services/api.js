@@ -1,6 +1,11 @@
 // Configuración de la API
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000';
 
+// Log en desarrollo para verificar la URL del backend
+if (import.meta.env.DEV) {
+  console.log('🔧 Backend URL configurada:', BACKEND_URL);
+}
+
 // Función helper para hacer peticiones
 const apiRequest = async (endpoint, options = {}) => {
   const token = localStorage.getItem('token');
@@ -15,17 +20,50 @@ const apiRequest = async (endpoint, options = {}) => {
   };
 
   try {
-    const response = await fetch(`${BACKEND_URL}${endpoint}`, config);
-    const data = await response.json();
+    const url = `${BACKEND_URL}${endpoint}`;
+    console.log('🌐 Haciendo petición a:', url);
+    
+    const response = await fetch(url, config);
+    
+    // Verificar si la respuesta es JSON
+    const contentType = response.headers.get('content-type');
+    let data;
+    
+    if (contentType && contentType.includes('application/json')) {
+      data = await response.json();
+    } else {
+      const text = await response.text();
+      console.error('❌ Respuesta no es JSON:', text);
+      throw new Error(`Error del servidor: ${response.status} ${response.statusText}`);
+    }
 
     if (!response.ok) {
-      throw new Error(data.message || 'Error en la petición');
+      const errorMessage = data.message || data.error || `Error ${response.status}: ${response.statusText}`;
+      console.error('❌ Error en respuesta:', {
+        status: response.status,
+        statusText: response.statusText,
+        data: data
+      });
+      throw new Error(errorMessage);
     }
 
     return data;
   } catch (error) {
-    console.error('API Error:', error);
-    throw error;
+    // Si es un error de red (fetch falló)
+    if (error.name === 'TypeError' && error.message.includes('fetch')) {
+      console.error('❌ Error de conexión:', error);
+      throw new Error(`No se pudo conectar al servidor. Verifica que el backend esté corriendo en ${BACKEND_URL}`);
+    }
+    
+    // Si ya es un Error con mensaje, lanzarlo tal cual
+    if (error instanceof Error) {
+      console.error('❌ API Error:', error.message);
+      throw error;
+    }
+    
+    // Cualquier otro error
+    console.error('❌ Error desconocido:', error);
+    throw new Error('Error al iniciar sesión. Por favor, intenta de nuevo.');
   }
 };
 

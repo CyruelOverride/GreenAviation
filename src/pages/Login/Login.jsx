@@ -35,8 +35,18 @@ const Login = ({ setIsAuthenticated, setUserRole }) => {
         navigate('/estudio-teorico');
       }
     } catch (err) {
-      setError(err.message || 'Credenciales incorrectas. Por favor, verifica tu email y contraseña.');
+      const errorMessage = err.message || 'Error al iniciar sesión. Por favor, verifica tus credenciales.';
+      setError(errorMessage);
       console.error('Login error:', err);
+      
+      // Mostrar más detalles en consola para debugging
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Detalles del error:', {
+          message: err.message,
+          stack: err.stack,
+          name: err.name
+        });
+      }
     } finally {
       setLoading(false);
     }
