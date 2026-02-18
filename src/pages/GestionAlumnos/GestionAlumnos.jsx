@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import * as XLSX from 'xlsx';
 import { userAPI } from '../../services/api';
 import './GestionAlumnos.css';
 
@@ -18,9 +17,49 @@ const GestionAlumnos = ({ userRole, isAuthenticated }) => {
     apellido: '',
     cedula: '',
     numeroTelefono: '',
+    telefono: '',
+    celular: '',
     edad: '',
+    fechaNac: '',
+    direccion: '',
+    departamento: '',
+    ciudad: '',
+    sexo: '',
+    contactoEmergencia: '',
+    nombreEmergencia: '',
+    emergenciaMedica: '',
     fechaInicioCurso: new Date().toISOString().split('T')[0],
-    estado: 'Cursando'
+    estado: 'Cursando',
+    tieneEntrenamientoPrevio: false,
+    entrenamientoPrevio: {
+      dual: '',
+      navDual: '',
+      solo: '',
+      navSolo: '',
+      nocturnoSolo: '',
+      noctSolo: '',
+      aterrizajesNoct: '',
+      instruccionTeorica: '',
+      instruccionTierra: '',
+      instruccionVuelo: '',
+      chequeoFasesComp: '',
+      ciacInstructor: '',
+      carteDeTransferencia: false
+    },
+    inscripcion: {
+      certificadoMedico: '',
+      licenciaAlumno: '',
+      fechaEmitidoCertificadoMedico: '',
+      vencimientoCertificadoMedico: '',
+      fechaEmitidoLicenciaAlumno: '',
+      vencimientoLicenciaAlumno: '',
+      totalDesdeInscripcion: '',
+      hsTeorico: '',
+      hsVueloTotal: '',
+      totalFaseTeorica: '',
+      totalFaseVuelo: '',
+      otros: ''
+    }
   });
   const [createLoading, setCreateLoading] = useState(false);
 
@@ -47,27 +86,6 @@ const GestionAlumnos = ({ userRole, isAuthenticated }) => {
     }
   };
 
-  const handleExport = () => {
-    const data = students.map(student => ({
-      'ID': student.id || student._id,
-      'Nombre': `${student.nombre || ''} ${student.apellido || ''}`.trim(),
-      'Email': student.email,
-      'Cédula': student.cedula || '',
-      'Teléfono': student.numeroTelefono || '',
-      'Edad': student.edad || '',
-      'Progreso (%)': student.progreso || 0,
-      'Estado': student.estado || 'Cursando',
-      'Fecha Inicio': student.fechaInicioCurso ? new Date(student.fechaInicioCurso).toLocaleDateString() : ''
-    }));
-
-    const ws = XLSX.utils.json_to_sheet(data);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'Alumnos');
-
-    const fecha = new Date().toISOString().split('T')[0];
-    const fileName = `alumnos_${fecha}.xlsx`;
-    XLSX.writeFile(wb, fileName);
-  };
 
   const handleViewDetails = (student) => {
     setSelectedStudent(student);
@@ -77,41 +95,47 @@ const GestionAlumnos = ({ userRole, isAuthenticated }) => {
     setSelectedStudent(null);
   };
 
-  const handleExportStudent = (student) => {
-    const data = [{
-      'ID': student.id || student._id,
-      'Nombre': student.nombre || '',
-      'Apellido': student.apellido || '',
-      'Nombre Completo': `${student.nombre || ''} ${student.apellido || ''}`.trim(),
-      'Email': student.email,
-      'Cédula': student.cedula || '',
-      'Teléfono': student.numeroTelefono || '',
-      'Edad': student.edad || '',
-      'Progreso (%)': student.progreso || 0,
-      'Estado': student.estado || 'Cursando',
-      'Curso': student.curso || 'Piloto Privado',
-      'Fecha de Inscripción': student.fechaInicioCurso ? new Date(student.fechaInicioCurso).toLocaleDateString() : '',
-      'Último Acceso': student.ultimoAcceso ? new Date(student.ultimoAcceso).toLocaleDateString() : ''
-    }];
+  const handleExportStudent = async (student) => {
+    try {
+      const studentId = student.id || student._id;
+      if (!studentId) {
+        alert('Error: No se pudo identificar el ID del alumno');
+        return;
+      }
 
-    const ws = XLSX.utils.json_to_sheet(data);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'Alumno');
-
-    const nombreArchivo = `${student.nombre || 'alumno'}_${student.apellido || ''}`.replace(/\s+/g, '_').toLowerCase();
-    const fileName = `alumno_${nombreArchivo}.xlsx`;
-    XLSX.writeFile(wb, fileName);
+      // Llamar al backend para exportar el Excel completo
+      await userAPI.exportExcel(studentId);
+    } catch (err) {
+      alert(err.message || 'Error al exportar el historial del alumno');
+      console.error('Error exporting student:', err);
+    }
   };
 
   const handleCreateUser = async (e) => {
     e.preventDefault();
     try {
       setCreateLoading(true);
-      const response = await userAPI.create(createFormData);
+      
+      // Preparar datos para enviar
+      const dataToSend = {
+        ...createFormData,
+        // Solo enviar entrenamientoPrevio si tieneEntrenamientoPrevio es true
+        entrenamientoPrevio: createFormData.tieneEntrenamientoPrevio ? createFormData.entrenamientoPrevio : null,
+        // Limpiar valores vacíos de entrenamientoPrevio
+        entrenamientoPrevio: createFormData.tieneEntrenamientoPrevio ? Object.fromEntries(
+          Object.entries(createFormData.entrenamientoPrevio).map(([key, value]) => [
+            key,
+            value === '' ? null : (typeof value === 'string' && !isNaN(value) && value !== '') ? parseFloat(value) : value
+          ])
+        ) : null
+      };
+      
+      const response = await userAPI.create(dataToSend);
       
       if (response.success) {
         alert('Usuario creado exitosamente');
         setShowCreateModal(false);
+        // Resetear formulario
         setCreateFormData({
           email: '',
           password: '',
@@ -120,9 +144,49 @@ const GestionAlumnos = ({ userRole, isAuthenticated }) => {
           apellido: '',
           cedula: '',
           numeroTelefono: '',
+          telefono: '',
+          celular: '',
           edad: '',
+          fechaNac: '',
+          direccion: '',
+          departamento: '',
+          ciudad: '',
+          sexo: '',
+          contactoEmergencia: '',
+          nombreEmergencia: '',
+          emergenciaMedica: '',
           fechaInicioCurso: new Date().toISOString().split('T')[0],
-          estado: 'Cursando'
+          estado: 'Cursando',
+          tieneEntrenamientoPrevio: false,
+          entrenamientoPrevio: {
+            dual: '',
+            navDual: '',
+            solo: '',
+            navSolo: '',
+            nocturnoSolo: '',
+            noctSolo: '',
+            aterrizajesNoct: '',
+            instruccionTeorica: '',
+            instruccionTierra: '',
+            instruccionVuelo: '',
+            chequeoFasesComp: '',
+            ciacInstructor: '',
+            carteDeTransferencia: false
+          },
+          inscripcion: {
+            certificadoMedico: '',
+            licenciaAlumno: '',
+            fechaEmitidoCertificadoMedico: '',
+            vencimientoCertificadoMedico: '',
+            fechaEmitidoLicenciaAlumno: '',
+            vencimientoLicenciaAlumno: '',
+            totalDesdeInscripcion: '',
+            hsTeorico: '',
+            hsVueloTotal: '',
+            totalFaseTeorica: '',
+            totalFaseVuelo: '',
+            otros: ''
+          }
         });
         loadStudents();
       }
@@ -135,11 +199,33 @@ const GestionAlumnos = ({ userRole, isAuthenticated }) => {
   };
 
   const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setCreateFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
+    const { name, value, type, checked } = e.target;
+    
+    // Manejar campos anidados (entrenamientoPrevio, inscripcion)
+    if (name.startsWith('entrenamientoPrevio.')) {
+      const field = name.split('.')[1];
+      setCreateFormData(prev => ({
+        ...prev,
+        entrenamientoPrevio: {
+          ...prev.entrenamientoPrevio,
+          [field]: type === 'checkbox' ? checked : value
+        }
+      }));
+    } else if (name.startsWith('inscripcion.')) {
+      const field = name.split('.')[1];
+      setCreateFormData(prev => ({
+        ...prev,
+        inscripcion: {
+          ...prev.inscripcion,
+          [field]: value
+        }
+      }));
+    } else {
+      setCreateFormData(prev => ({
+        ...prev,
+        [name]: type === 'checkbox' ? checked : value
+      }));
+    }
   };
 
   if (!isAuthenticated) {
@@ -200,9 +286,6 @@ const GestionAlumnos = ({ userRole, isAuthenticated }) => {
             onClick={() => setShowCreateModal(true)}
           >
             + Nuevo Usuario
-          </button>
-          <button className="btn-primary" onClick={handleExport}>
-            Exportar a Excel
           </button>
         </div>
       </div>
@@ -296,7 +379,7 @@ const GestionAlumnos = ({ userRole, isAuthenticated }) => {
       {/* Modal de Crear Usuario */}
       {showCreateModal && (
         <div className="student-modal">
-          <div className="modal-content" style={{ maxWidth: '600px' }}>
+          <div className="modal-content" style={{ maxWidth: '800px', maxHeight: '90vh', overflowY: 'auto' }}>
             <div className="modal-header">
               <h2>Crear Nuevo Usuario</h2>
               <button className="modal-close" onClick={() => setShowCreateModal(false)}>×</button>
@@ -347,6 +430,8 @@ const GestionAlumnos = ({ userRole, isAuthenticated }) => {
                   />
                 </div>
               </div>
+              <h3 style={{ marginTop: '20px', marginBottom: '15px', borderBottom: '2px solid #e0e0e0', paddingBottom: '10px' }}>Datos Personales</h3>
+              
               <div className="form-row">
                 <div className="form-group">
                   <label>Cédula</label>
@@ -358,6 +443,18 @@ const GestionAlumnos = ({ userRole, isAuthenticated }) => {
                   />
                 </div>
                 <div className="form-group">
+                  <label>Fecha de Nacimiento</label>
+                  <input
+                    type="date"
+                    name="fechaNac"
+                    value={createFormData.fechaNac}
+                    onChange={handleInputChange}
+                  />
+                </div>
+              </div>
+              
+              <div className="form-row">
+                <div className="form-group">
                   <label>Teléfono</label>
                   <input
                     type="text"
@@ -366,7 +463,109 @@ const GestionAlumnos = ({ userRole, isAuthenticated }) => {
                     onChange={handleInputChange}
                   />
                 </div>
+                <div className="form-group">
+                  <label>Celular</label>
+                  <input
+                    type="text"
+                    name="celular"
+                    value={createFormData.celular}
+                    onChange={handleInputChange}
+                  />
+                </div>
               </div>
+              
+              <div className="form-row">
+                <div className="form-group">
+                  <label>Teléfono Fijo</label>
+                  <input
+                    type="text"
+                    name="telefono"
+                    value={createFormData.telefono}
+                    onChange={handleInputChange}
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Sexo</label>
+                  <select
+                    name="sexo"
+                    value={createFormData.sexo}
+                    onChange={handleInputChange}
+                  >
+                    <option value="">Seleccionar</option>
+                    <option value="Hombre">Hombre</option>
+                    <option value="Mujer">Mujer</option>
+                  </select>
+                </div>
+              </div>
+              
+              <div className="form-group">
+                <label>Dirección</label>
+                <input
+                  type="text"
+                  name="direccion"
+                  value={createFormData.direccion}
+                  onChange={handleInputChange}
+                  placeholder="Calle y número"
+                />
+              </div>
+              
+              <div className="form-row">
+                <div className="form-group">
+                  <label>Ciudad</label>
+                  <input
+                    type="text"
+                    name="ciudad"
+                    value={createFormData.ciudad}
+                    onChange={handleInputChange}
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Departamento</label>
+                  <input
+                    type="text"
+                    name="departamento"
+                    value={createFormData.departamento}
+                    onChange={handleInputChange}
+                  />
+                </div>
+              </div>
+              
+              <h3 style={{ marginTop: '20px', marginBottom: '15px', borderBottom: '2px solid #e0e0e0', paddingBottom: '10px' }}>Contacto de Emergencia</h3>
+              
+              <div className="form-row">
+                <div className="form-group">
+                  <label>Nombre del Contacto</label>
+                  <input
+                    type="text"
+                    name="nombreEmergencia"
+                    value={createFormData.nombreEmergencia}
+                    onChange={handleInputChange}
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Teléfono de Emergencia</label>
+                  <input
+                    type="text"
+                    name="contactoEmergencia"
+                    value={createFormData.contactoEmergencia}
+                    onChange={handleInputChange}
+                  />
+                </div>
+              </div>
+              
+              <div className="form-group">
+                <label>Información Médica Relevante</label>
+                <textarea
+                  name="emergenciaMedica"
+                  value={createFormData.emergenciaMedica}
+                  onChange={handleInputChange}
+                  rows="3"
+                  placeholder="Alergias, condiciones médicas, etc."
+                />
+              </div>
+              
+              <h3 style={{ marginTop: '20px', marginBottom: '15px', borderBottom: '2px solid #e0e0e0', paddingBottom: '10px' }}>Información del Curso</h3>
+              
               <div className="form-row">
                 <div className="form-group">
                   <label>Edad</label>
@@ -391,6 +590,7 @@ const GestionAlumnos = ({ userRole, isAuthenticated }) => {
                   </select>
                 </div>
               </div>
+              
               <div className="form-group">
                 <label>Fecha de Inicio del Curso</label>
                 <input
@@ -399,6 +599,316 @@ const GestionAlumnos = ({ userRole, isAuthenticated }) => {
                   value={createFormData.fechaInicioCurso}
                   onChange={handleInputChange}
                 />
+              </div>
+              
+              <h3 style={{ marginTop: '20px', marginBottom: '15px', borderBottom: '2px solid #e0e0e0', paddingBottom: '10px' }}>Entrenamiento Previo</h3>
+              
+              <div className="form-group">
+                <label style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <input
+                    type="checkbox"
+                    name="tieneEntrenamientoPrevio"
+                    checked={createFormData.tieneEntrenamientoPrevio}
+                    onChange={handleInputChange}
+                  />
+                  <span>Tiene entrenamiento previo</span>
+                </label>
+              </div>
+              
+              {createFormData.tieneEntrenamientoPrevio && (
+                <div style={{ marginLeft: '20px', padding: '15px', background: '#f5f5f5', borderRadius: '8px' }}>
+                  <h4 style={{ marginBottom: '15px' }}>Horas de Vuelo</h4>
+                  <div className="form-row">
+                    <div className="form-group">
+                      <label>Dual</label>
+                      <input
+                        type="number"
+                        name="entrenamientoPrevio.dual"
+                        value={createFormData.entrenamientoPrevio.dual}
+                        onChange={handleInputChange}
+                        step="0.1"
+                        min="0"
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label>Nav Dual</label>
+                      <input
+                        type="number"
+                        name="entrenamientoPrevio.navDual"
+                        value={createFormData.entrenamientoPrevio.navDual}
+                        onChange={handleInputChange}
+                        step="0.1"
+                        min="0"
+                      />
+                    </div>
+                  </div>
+                  <div className="form-row">
+                    <div className="form-group">
+                      <label>Solo</label>
+                      <input
+                        type="number"
+                        name="entrenamientoPrevio.solo"
+                        value={createFormData.entrenamientoPrevio.solo}
+                        onChange={handleInputChange}
+                        step="0.1"
+                        min="0"
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label>Nav Solo</label>
+                      <input
+                        type="number"
+                        name="entrenamientoPrevio.navSolo"
+                        value={createFormData.entrenamientoPrevio.navSolo}
+                        onChange={handleInputChange}
+                        step="0.1"
+                        min="0"
+                      />
+                    </div>
+                  </div>
+                  <div className="form-row">
+                    <div className="form-group">
+                      <label>Nocturno Solo</label>
+                      <input
+                        type="number"
+                        name="entrenamientoPrevio.nocturnoSolo"
+                        value={createFormData.entrenamientoPrevio.nocturnoSolo}
+                        onChange={handleInputChange}
+                        step="0.1"
+                        min="0"
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label>Noct Solo</label>
+                      <input
+                        type="number"
+                        name="entrenamientoPrevio.noctSolo"
+                        value={createFormData.entrenamientoPrevio.noctSolo}
+                        onChange={handleInputChange}
+                        step="0.1"
+                        min="0"
+                      />
+                    </div>
+                  </div>
+                  <div className="form-group">
+                    <label>Aterrizajes Nocturnos</label>
+                    <input
+                      type="number"
+                      name="entrenamientoPrevio.aterrizajesNoct"
+                      value={createFormData.entrenamientoPrevio.aterrizajesNoct}
+                      onChange={handleInputChange}
+                      step="0.1"
+                      min="0"
+                    />
+                  </div>
+                  
+                  <h4 style={{ marginTop: '20px', marginBottom: '15px' }}>Instrucción</h4>
+                  <div className="form-row">
+                    <div className="form-group">
+                      <label>Instrucción Teórica</label>
+                      <input
+                        type="number"
+                        name="entrenamientoPrevio.instruccionTeorica"
+                        value={createFormData.entrenamientoPrevio.instruccionTeorica}
+                        onChange={handleInputChange}
+                        step="0.1"
+                        min="0"
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label>Instrucción Tierra</label>
+                      <input
+                        type="number"
+                        name="entrenamientoPrevio.instruccionTierra"
+                        value={createFormData.entrenamientoPrevio.instruccionTierra}
+                        onChange={handleInputChange}
+                        step="0.1"
+                        min="0"
+                      />
+                    </div>
+                  </div>
+                  <div className="form-group">
+                    <label>Instrucción Vuelo</label>
+                    <input
+                      type="number"
+                      name="entrenamientoPrevio.instruccionVuelo"
+                      value={createFormData.entrenamientoPrevio.instruccionVuelo}
+                      onChange={handleInputChange}
+                      step="0.1"
+                      min="0"
+                    />
+                  </div>
+                  
+                  <h4 style={{ marginTop: '20px', marginBottom: '15px' }}>Información Adicional</h4>
+                  <div className="form-group">
+                    <label>Chequeo Fases Comp</label>
+                    <input
+                      type="text"
+                      name="entrenamientoPrevio.chequeoFasesComp"
+                      value={createFormData.entrenamientoPrevio.chequeoFasesComp}
+                      onChange={handleInputChange}
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>CIAC Instructor (separar por comas si hay varios)</label>
+                    <input
+                      type="text"
+                      name="entrenamientoPrevio.ciacInstructor"
+                      value={createFormData.entrenamientoPrevio.ciacInstructor}
+                      onChange={handleInputChange}
+                      placeholder="Ej: Juan Gabriel, Juan Martin"
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                      <input
+                        type="checkbox"
+                        name="entrenamientoPrevio.carteDeTransferencia"
+                        checked={createFormData.entrenamientoPrevio.carteDeTransferencia}
+                        onChange={handleInputChange}
+                      />
+                      <span>Carte de Transferencia</span>
+                    </label>
+                  </div>
+                </div>
+              )}
+              
+              <h3 style={{ marginTop: '20px', marginBottom: '15px', borderBottom: '2px solid #e0e0e0', paddingBottom: '10px' }}>Inscripción</h3>
+              
+              <div className="form-row">
+                <div className="form-group">
+                  <label>Certificado Médico</label>
+                  <input
+                    type="text"
+                    name="inscripcion.certificadoMedico"
+                    value={createFormData.inscripcion.certificadoMedico}
+                    onChange={handleInputChange}
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Licencia Alumno</label>
+                  <input
+                    type="text"
+                    name="inscripcion.licenciaAlumno"
+                    value={createFormData.inscripcion.licenciaAlumno}
+                    onChange={handleInputChange}
+                  />
+                </div>
+              </div>
+              
+              <div className="form-row">
+                <div className="form-group">
+                  <label>Fecha Emitido Certificado Médico</label>
+                  <input
+                    type="date"
+                    name="inscripcion.fechaEmitidoCertificadoMedico"
+                    value={createFormData.inscripcion.fechaEmitidoCertificadoMedico}
+                    onChange={handleInputChange}
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Vencimiento Certificado Médico</label>
+                  <input
+                    type="date"
+                    name="inscripcion.vencimientoCertificadoMedico"
+                    value={createFormData.inscripcion.vencimientoCertificadoMedico}
+                    onChange={handleInputChange}
+                  />
+                </div>
+              </div>
+              
+              <div className="form-row">
+                <div className="form-group">
+                  <label>Fecha Emitido Licencia Alumno</label>
+                  <input
+                    type="date"
+                    name="inscripcion.fechaEmitidoLicenciaAlumno"
+                    value={createFormData.inscripcion.fechaEmitidoLicenciaAlumno}
+                    onChange={handleInputChange}
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Vencimiento Licencia Alumno</label>
+                  <input
+                    type="date"
+                    name="inscripcion.vencimientoLicenciaAlumno"
+                    value={createFormData.inscripcion.vencimientoLicenciaAlumno}
+                    onChange={handleInputChange}
+                  />
+                </div>
+              </div>
+              
+              <div className="form-row">
+                <div className="form-group">
+                  <label>Total Desde Inscripción</label>
+                  <input
+                    type="number"
+                    name="inscripcion.totalDesdeInscripcion"
+                    value={createFormData.inscripcion.totalDesdeInscripcion}
+                    onChange={handleInputChange}
+                    step="0.01"
+                    min="0"
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Horas Teórico</label>
+                  <input
+                    type="number"
+                    name="inscripcion.hsTeorico"
+                    value={createFormData.inscripcion.hsTeorico}
+                    onChange={handleInputChange}
+                    step="0.1"
+                    min="0"
+                  />
+                </div>
+              </div>
+              
+              <div className="form-row">
+                <div className="form-group">
+                  <label>Horas Vuelo Total</label>
+                  <input
+                    type="number"
+                    name="inscripcion.hsVueloTotal"
+                    value={createFormData.inscripcion.hsVueloTotal}
+                    onChange={handleInputChange}
+                    step="0.1"
+                    min="0"
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Total Fase Teórica</label>
+                  <input
+                    type="number"
+                    name="inscripcion.totalFaseTeorica"
+                    value={createFormData.inscripcion.totalFaseTeorica}
+                    onChange={handleInputChange}
+                    step="0.01"
+                    min="0"
+                  />
+                </div>
+              </div>
+              
+              <div className="form-row">
+                <div className="form-group">
+                  <label>Total Fase Vuelo</label>
+                  <input
+                    type="number"
+                    name="inscripcion.totalFaseVuelo"
+                    value={createFormData.inscripcion.totalFaseVuelo}
+                    onChange={handleInputChange}
+                    step="0.01"
+                    min="0"
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Otros</label>
+                  <input
+                    type="text"
+                    name="inscripcion.otros"
+                    value={createFormData.inscripcion.otros}
+                    onChange={handleInputChange}
+                  />
+                </div>
               </div>
               <div className="modal-footer">
                 <button 

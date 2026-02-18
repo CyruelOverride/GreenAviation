@@ -129,6 +129,49 @@ export const userAPI = {
   getStats: async () => {
     return apiRequest('/api/users/stats/overview');
   },
+
+  exportExcel: async (id) => {
+    const token = localStorage.getItem('token');
+    const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000';
+    
+    const response = await fetch(`${BACKEND_URL}/api/users/${id}/export-excel`, {
+      method: 'GET',
+      headers: {
+        ...(token && { Authorization: `Bearer ${token}` }),
+      },
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.message || `Error ${response.status}: ${response.statusText}`);
+    }
+
+    // Obtener el blob del archivo
+    const blob = await response.blob();
+    
+    // Crear un enlace temporal para descargar
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    
+    // Obtener el nombre del archivo del header Content-Disposition
+    const contentDisposition = response.headers.get('Content-Disposition');
+    let fileName = `historial_alumno_${id}.xlsx`;
+    if (contentDisposition) {
+      const fileNameMatch = contentDisposition.match(/filename="(.+)"/);
+      if (fileNameMatch) {
+        fileName = fileNameMatch[1];
+      }
+    }
+    
+    a.download = fileName;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+    
+    return { success: true, message: 'Archivo descargado exitosamente' };
+  },
 };
 
 // API de Vuelos
