@@ -19,7 +19,6 @@ const GestionAlumnos = ({ userRole, isAuthenticated }) => {
     numeroTelefono: '',
     telefono: '',
     celular: '',
-    edad: '',
     fechaNac: '',
     direccion: '',
     departamento: '',
@@ -52,13 +51,7 @@ const GestionAlumnos = ({ userRole, isAuthenticated }) => {
       fechaEmitidoCertificadoMedico: '',
       vencimientoCertificadoMedico: '',
       fechaEmitidoLicenciaAlumno: '',
-      vencimientoLicenciaAlumno: '',
-      totalDesdeInscripcion: '',
-      hsTeorico: '',
-      hsVueloTotal: '',
-      totalFaseTeorica: '',
-      totalFaseVuelo: '',
-      otros: ''
+      vencimientoLicenciaAlumno: ''
     }
   });
   const [createLoading, setCreateLoading] = useState(false);
@@ -146,7 +139,6 @@ const GestionAlumnos = ({ userRole, isAuthenticated }) => {
           numeroTelefono: '',
           telefono: '',
           celular: '',
-          edad: '',
           fechaNac: '',
           direccion: '',
           departamento: '',
@@ -179,13 +171,7 @@ const GestionAlumnos = ({ userRole, isAuthenticated }) => {
             fechaEmitidoCertificadoMedico: '',
             vencimientoCertificadoMedico: '',
             fechaEmitidoLicenciaAlumno: '',
-            vencimientoLicenciaAlumno: '',
-            totalDesdeInscripcion: '',
-            hsTeorico: '',
-            hsVueloTotal: '',
-            totalFaseTeorica: '',
-            totalFaseVuelo: '',
-            otros: ''
+            vencimientoLicenciaAlumno: ''
           }
         });
         loadStudents();
@@ -566,31 +552,6 @@ const GestionAlumnos = ({ userRole, isAuthenticated }) => {
               
               <h3 style={{ marginTop: '20px', marginBottom: '15px', borderBottom: '2px solid #e0e0e0', paddingBottom: '10px' }}>Información del Curso</h3>
               
-              <div className="form-row">
-                <div className="form-group">
-                  <label>Edad</label>
-                  <input
-                    type="number"
-                    name="edad"
-                    value={createFormData.edad}
-                    onChange={handleInputChange}
-                    min="16"
-                    max="100"
-                  />
-                </div>
-                <div className="form-group">
-                  <label>Estado</label>
-                  <select
-                    name="estado"
-                    value={createFormData.estado}
-                    onChange={handleInputChange}
-                  >
-                    <option value="Cursando">Cursando</option>
-                    <option value="Finalizado">Finalizado</option>
-                  </select>
-                </div>
-              </div>
-              
               <div className="form-group">
                 <label>Fecha de Inicio del Curso</label>
                 <input
@@ -838,78 +799,6 @@ const GestionAlumnos = ({ userRole, isAuthenticated }) => {
                 </div>
               </div>
               
-              <div className="form-row">
-                <div className="form-group">
-                  <label>Total Desde Inscripción</label>
-                  <input
-                    type="number"
-                    name="inscripcion.totalDesdeInscripcion"
-                    value={createFormData.inscripcion.totalDesdeInscripcion}
-                    onChange={handleInputChange}
-                    step="0.01"
-                    min="0"
-                  />
-                </div>
-                <div className="form-group">
-                  <label>Horas Teórico</label>
-                  <input
-                    type="number"
-                    name="inscripcion.hsTeorico"
-                    value={createFormData.inscripcion.hsTeorico}
-                    onChange={handleInputChange}
-                    step="0.1"
-                    min="0"
-                  />
-                </div>
-              </div>
-              
-              <div className="form-row">
-                <div className="form-group">
-                  <label>Horas Vuelo Total</label>
-                  <input
-                    type="number"
-                    name="inscripcion.hsVueloTotal"
-                    value={createFormData.inscripcion.hsVueloTotal}
-                    onChange={handleInputChange}
-                    step="0.1"
-                    min="0"
-                  />
-                </div>
-                <div className="form-group">
-                  <label>Total Fase Teórica</label>
-                  <input
-                    type="number"
-                    name="inscripcion.totalFaseTeorica"
-                    value={createFormData.inscripcion.totalFaseTeorica}
-                    onChange={handleInputChange}
-                    step="0.01"
-                    min="0"
-                  />
-                </div>
-              </div>
-              
-              <div className="form-row">
-                <div className="form-group">
-                  <label>Total Fase Vuelo</label>
-                  <input
-                    type="number"
-                    name="inscripcion.totalFaseVuelo"
-                    value={createFormData.inscripcion.totalFaseVuelo}
-                    onChange={handleInputChange}
-                    step="0.01"
-                    min="0"
-                  />
-                </div>
-                <div className="form-group">
-                  <label>Otros</label>
-                  <input
-                    type="text"
-                    name="inscripcion.otros"
-                    value={createFormData.inscripcion.otros}
-                    onChange={handleInputChange}
-                  />
-                </div>
-              </div>
               <div className="modal-footer">
                 <button 
                   type="button" 
