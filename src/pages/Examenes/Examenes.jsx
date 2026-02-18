@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { examenAPI } from '../../services/api';
 import './Examenes.css';
@@ -24,6 +24,21 @@ const Examenes = ({ isAuthenticated, userRole }) => {
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
+  const handleFinishExam = useCallback(async () => {
+    if (!examen) return;
+    try {
+      const response = await examenAPI.finalizar(examen.id);
+      if (response.success) {
+        setExamFinished(true);
+        setExamStarted(false);
+        setExamen(response.data.examen);
+      }
+    } catch (err) {
+      setError(err.message || 'Error al finalizar el examen');
+      console.error('Error al finalizar examen:', err);
+    }
+  }, [examen]);
+
   useEffect(() => {
     if (examenStarted && timeRemaining > 0 && examen) {
       const timer = setInterval(() => {
@@ -37,7 +52,7 @@ const Examenes = ({ isAuthenticated, userRole }) => {
       }, 1000);
       return () => clearInterval(timer);
     }
-  }, [examenStarted, timeRemaining, examen]);
+  }, [examenStarted, timeRemaining, examen, handleFinishExam]);
 
   // Sincronizar selectedAnswer con userAnswers cuando cambia la pregunta
   useEffect(() => {
@@ -62,7 +77,7 @@ const Examenes = ({ isAuthenticated, userRole }) => {
       if (response.success) {
         const nuevoExamen = response.data.examen;
         setExamen(nuevoExamen);
-        setExamenStarted(true);
+        setExamStarted(true);
         setCapituloSeleccionado(capitulo);
         // Convertir tiempo límite de minutos a segundos
         setTimeRemaining((nuevoExamen.tiempoLimite || 60) * 60);
@@ -80,6 +95,7 @@ const Examenes = ({ isAuthenticated, userRole }) => {
   };
 
   const handleAnswerChange = async (preguntaId, opcionId) => {
+    if (!examen) return;
     setSelectedAnswer(opcionId);
     setUserAnswers(prev => ({
       ...prev,
@@ -91,19 +107,6 @@ const Examenes = ({ isAuthenticated, userRole }) => {
       await examenAPI.responderPregunta(examen.id, preguntaId, opcionId);
     } catch (err) {
       console.error('Error al guardar respuesta:', err);
-    }
-  };
-
-  const handleFinishExam = async () => {
-    try {
-      const response = await examenAPI.finalizar(examen.id);
-      if (response.success) {
-        setExamFinished(true);
-        setExamen(response.data.examen);
-      }
-    } catch (err) {
-      setError(err.message || 'Error al finalizar el examen');
-      console.error('Error al finalizar examen:', err);
     }
   };
 
