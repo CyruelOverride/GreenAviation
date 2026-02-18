@@ -151,6 +151,14 @@ const Sidebar = ({ userRole, isAuthenticated, isOpen, onClose }) => {
                 <span className="nav-icon">✈️</span>
                 <span>Gestión de Vuelos</span>
               </Link>
+              <Link 
+                to="/gestion-preguntas" 
+                className={`nav-item ${isActive('/gestion-preguntas') ? 'active' : ''}`}
+                onClick={handleLinkClick}
+              >
+                <span className="nav-icon">📝</span>
+                <span>Gestión de Preguntas</span>
+              </Link>
             </>
           )}
 

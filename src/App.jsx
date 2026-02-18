@@ -7,6 +7,7 @@ import EstudioTeorico from './pages/EstudioTeorico/EstudioTeorico';
 import Examenes from './pages/Examenes/Examenes';
 import GestionAlumnos from './pages/GestionAlumnos/GestionAlumnos';
 import GestionVuelos from './pages/GestionVuelos/GestionVuelos';
+import GestionPreguntas from './pages/GestionPreguntas/GestionPreguntas';
 import MiPerfil from './pages/MiPerfil/MiPerfil';
 import RecursosAdicionales from './pages/RecursosAdicionales/RecursosAdicionales';
 import ClasesOnline from './pages/ClasesOnline/ClasesOnline';
@@ -117,6 +118,10 @@ function App() {
               <Route 
                 path="/gestion-vuelos" 
                 element={<GestionVuelos userRole={userRole} isAuthenticated={isAuthenticated} />}
+              />
+              <Route 
+                path="/gestion-preguntas" 
+                element={<GestionPreguntas userRole={userRole} isAuthenticated={isAuthenticated} />}
               />
               <Route 
                 path="/mi-perfil" 

@@ -171,9 +171,73 @@ export const flightAPI = {
   },
 };
 
+// API de Exámenes
+export const examenAPI = {
+  create: async (examenData) => {
+    return apiRequest('/api/examenes', {
+      method: 'POST',
+      body: JSON.stringify(examenData),
+    });
+  },
+
+  getById: async (id) => {
+    return apiRequest(`/api/examenes/${id}`);
+  },
+
+  getAll: async (usuarioId = null) => {
+    const query = usuarioId ? `?usuarioId=${usuarioId}` : '';
+    return apiRequest(`/api/examenes${query}`);
+  },
+
+  responderPregunta: async (examenId, preguntaId, opcionSeleccionadaId) => {
+    return apiRequest(`/api/examenes/${examenId}/preguntas/${preguntaId}`, {
+      method: 'PUT',
+      body: JSON.stringify({ opcionSeleccionadaId }),
+    });
+  },
+
+  finalizar: async (examenId) => {
+    return apiRequest(`/api/examenes/${examenId}/finalizar`, {
+      method: 'POST',
+    });
+  },
+
+  getStats: async (usuarioId = null) => {
+    const query = usuarioId ? `?usuarioId=${usuarioId}` : '';
+    return apiRequest(`/api/examenes/stats${query}`);
+  },
+};
+
+// API de Preguntas
+export const preguntaAPI = {
+  getByCapitulo: async (capitulo) => {
+    return apiRequest(`/api/preguntas?capitulo=${capitulo}`);
+  },
+
+  update: async (id, preguntaData) => {
+    return apiRequest(`/api/preguntas/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(preguntaData),
+    });
+  },
+};
+
+// API de Opciones
+export const opcionAPI = {
+  update: async (id, opcionData) => {
+    return apiRequest(`/api/opciones/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(opcionData),
+    });
+  },
+};
+
 export default {
   authAPI,
   userAPI,
   flightAPI,
+  examenAPI,
+  preguntaAPI,
+  opcionAPI,
 };
 
