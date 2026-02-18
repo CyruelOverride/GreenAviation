@@ -123,7 +123,15 @@ const Examenes = ({ isAuthenticated, userRole }) => {
   };
 
   // Vista de resultados
-  if (examFinished && examen) {
+  if (examFinished && examen && examen.preguntas) {
+    // Calcular estadísticas
+    const totalPreguntas = examen.preguntas.length;
+    const respuestasCorrectas = examen.preguntas.filter(p => {
+      const opcionSeleccionada = p.opciones.find(o => o.id === p.opcionSeleccionadaId);
+      return opcionSeleccionada && opcionSeleccionada.esCorrecta;
+    }).length;
+    const respuestasIncorrectas = totalPreguntas - respuestasCorrectas;
+
     return (
       <div className="examenes">
         <div className="exam-results">
@@ -136,6 +144,14 @@ const Examenes = ({ isAuthenticated, userRole }) => {
                   <span className="stat-label">Calificación:</span>
                   <span className="stat-value">{examen.puntaje?.toFixed(2) || 0}%</span>
                 </div>
+                <div className="stat-item correct">
+                  <span className="stat-label">Correctas:</span>
+                  <span className="stat-value">{respuestasCorrectas} / {totalPreguntas}</span>
+                </div>
+                <div className="stat-item incorrect">
+                  <span className="stat-label">Incorrectas:</span>
+                  <span className="stat-value">{respuestasIncorrectas} / {totalPreguntas}</span>
+                </div>
                 <div className="stat-item">
                   <span className="stat-label">Capítulo:</span>
                   <span className="stat-value">{examen.capitulo}</span>
@@ -146,6 +162,48 @@ const Examenes = ({ isAuthenticated, userRole }) => {
                 </div>
               </div>
             </div>
+          </div>
+
+          <div className="results-details">
+            <h2>Correcciones</h2>
+            <p className="corrections-intro">
+              Revisa tus respuestas. Las preguntas incorrectas muestran tu respuesta y la respuesta correcta.
+            </p>
+            {examen.preguntas.map((pregunta, index) => {
+              const opcionSeleccionada = pregunta.opciones.find(o => o.id === pregunta.opcionSeleccionadaId);
+              const opcionCorrecta = pregunta.opciones.find(o => o.esCorrecta);
+              const isCorrect = opcionSeleccionada && opcionSeleccionada.esCorrecta;
+
+              return (
+                <div key={pregunta.id} className={`result-item ${isCorrect ? 'correct' : 'incorrect'}`}>
+                  <div className="result-question-header">
+                    <span className="question-number">Pregunta {index + 1}</span>
+                    <span className={`result-badge ${isCorrect ? 'correct-badge' : 'incorrect-badge'}`}>
+                      {isCorrect ? '✓ Correcta' : '✗ Incorrecta'}
+                    </span>
+                  </div>
+                  <p className="result-question">{pregunta.enunciado}</p>
+                  <div className="result-answers">
+                    <div className="answer-row">
+                      <span className="answer-label">Tu respuesta:</span>
+                      <span className={`answer-value ${isCorrect ? 'correct' : 'incorrect'}`}>
+                        {opcionSeleccionada 
+                          ? opcionSeleccionada.texto
+                          : 'Sin responder'}
+                      </span>
+                    </div>
+                    {!isCorrect && opcionCorrecta && (
+                      <div className="answer-row">
+                        <span className="answer-label">Respuesta correcta:</span>
+                        <span className="answer-value correct">
+                          {opcionCorrecta.texto}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
           </div>
 
           <div className="results-actions">
