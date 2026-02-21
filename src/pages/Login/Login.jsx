@@ -102,9 +102,6 @@ const Login = ({ setIsAuthenticated, setUserRole }) => {
             {loading ? 'Iniciando sesión...' : 'Iniciar Sesión'}
           </button>
         </form>
-        <div className="login-footer">
-          <p>¿Olvidaste tu contraseña?</p>
-        </div>
       </div>
     </div>
   );

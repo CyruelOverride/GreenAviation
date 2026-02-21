@@ -9,6 +9,15 @@ const MiPerfil = ({ isAuthenticated, userRole }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState('perfil');
+  
+  // Estados para cambio de contraseña
+  const [passwordForm, setPasswordForm] = useState({
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: ''
+  });
+  const [passwordLoading, setPasswordLoading] = useState(false);
+  const [passwordMessage, setPasswordMessage] = useState({ type: '', text: '' });
 
   useEffect(() => {
     if (isAuthenticated && userRole === 'alumno') {
@@ -42,6 +51,46 @@ const MiPerfil = ({ isAuthenticated, userRole }) => {
       console.error('Error:', err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handlePasswordChange = (e) => {
+    const { name, value } = e.target;
+    setPasswordForm(prev => ({ ...prev, [name]: value }));
+    setPasswordMessage({ type: '', text: '' });
+  };
+
+  const handlePasswordSubmit = async (e) => {
+    e.preventDefault();
+    setPasswordMessage({ type: '', text: '' });
+
+    // Validaciones
+    if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+      setPasswordMessage({ type: 'error', text: 'Las contraseñas nuevas no coinciden' });
+      return;
+    }
+
+    if (passwordForm.newPassword.length < 6) {
+      setPasswordMessage({ type: 'error', text: 'La nueva contraseña debe tener al menos 6 caracteres' });
+      return;
+    }
+
+    setPasswordLoading(true);
+
+    try {
+      const response = await authAPI.changePassword(
+        passwordForm.currentPassword,
+        passwordForm.newPassword
+      );
+
+      if (response.success) {
+        setPasswordMessage({ type: 'success', text: 'Contraseña actualizada exitosamente' });
+        setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
+      }
+    } catch (err) {
+      setPasswordMessage({ type: 'error', text: err.message || 'Error al cambiar la contraseña' });
+    } finally {
+      setPasswordLoading(false);
     }
   };
 
@@ -106,6 +155,12 @@ const MiPerfil = ({ isAuthenticated, userRole }) => {
           onClick={() => setActiveTab('vuelos')}
         >
           Mis Vuelos
+        </button>
+        <button 
+          className={`tab ${activeTab === 'seguridad' ? 'active' : ''}`}
+          onClick={() => setActiveTab('seguridad')}
+        >
+          🔒 Seguridad
         </button>
       </div>
 
@@ -283,10 +338,76 @@ const MiPerfil = ({ isAuthenticated, userRole }) => {
             </div>
           </div>
         )}
+
+        {activeTab === 'seguridad' && (
+          <div className="perfil-section">
+            <div className="seguridad-card">
+              <h2>🔒 Cambiar Contraseña</h2>
+              <p className="seguridad-descripcion">
+                Por seguridad, te recomendamos cambiar tu contraseña periódicamente.
+              </p>
+              
+              <form onSubmit={handlePasswordSubmit} className="password-form">
+                <div className="form-group">
+                  <label htmlFor="currentPassword">Contraseña Actual</label>
+                  <input
+                    type="password"
+                    id="currentPassword"
+                    name="currentPassword"
+                    value={passwordForm.currentPassword}
+                    onChange={handlePasswordChange}
+                    placeholder="Ingresa tu contraseña actual"
+                    required
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="newPassword">Nueva Contraseña</label>
+                  <input
+                    type="password"
+                    id="newPassword"
+                    name="newPassword"
+                    value={passwordForm.newPassword}
+                    onChange={handlePasswordChange}
+                    placeholder="Mínimo 6 caracteres"
+                    required
+                    minLength={6}
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="confirmPassword">Confirmar Nueva Contraseña</label>
+                  <input
+                    type="password"
+                    id="confirmPassword"
+                    name="confirmPassword"
+                    value={passwordForm.confirmPassword}
+                    onChange={handlePasswordChange}
+                    placeholder="Repite la nueva contraseña"
+                    required
+                  />
+                </div>
+
+                {passwordMessage.text && (
+                  <div className={`password-message ${passwordMessage.type}`}>
+                    {passwordMessage.text}
+                  </div>
+                )}
+
+                <button 
+                  type="submit" 
+                  className="btn-cambiar-password"
+                  disabled={passwordLoading}
+                >
+                  {passwordLoading ? 'Cambiando...' : 'Cambiar Contraseña'}
+                </button>
+              </form>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
 };
 
 export default MiPerfil;
-

@@ -307,6 +307,103 @@
   border-radius: 8px;
 }
 
+/* Sección de Seguridad - Cambio de Contraseña */
+.seguridad-card {
+  max-width: 500px;
+}
+
+.seguridad-card h2 {
+  color: #1e3a8a;
+  font-size: 24px;
+  margin-bottom: 10px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid #e5e7eb;
+}
+
+.seguridad-descripcion {
+  color: #666;
+  margin-bottom: 25px;
+  font-size: 14px;
+}
+
+.password-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.password-form .form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.password-form .form-group label {
+  font-weight: 600;
+  color: #374151;
+  font-size: 14px;
+}
+
+.password-form .form-group input {
+  padding: 12px 16px;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 16px;
+  transition: all 0.2s;
+}
+
+.password-form .form-group input:focus {
+  outline: none;
+  border-color: #1d4ed8;
+  box-shadow: 0 0 0 3px rgba(29, 78, 216, 0.1);
+}
+
+.password-form .form-group input::placeholder {
+  color: #9ca3af;
+}
+
+.password-message {
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.password-message.success {
+  background: #dcfce7;
+  color: #16a34a;
+  border: 1px solid #86efac;
+}
+
+.password-message.error {
+  background: #fee2e2;
+  color: #dc2626;
+  border: 1px solid #fca5a5;
+}
+
+.btn-cambiar-password {
+  padding: 14px 24px;
+  background: linear-gradient(135deg, #1e3a8a 0%, #1d4ed8 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-top: 10px;
+}
+
+.btn-cambiar-password:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(29, 78, 216, 0.3);
+}
+
+.btn-cambiar-password:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
 @media (max-width: 768px) {
   .mi-perfil-container {
     padding: 15px;
@@ -327,6 +424,10 @@
 
   .stats-grid {
     grid-template-columns: repeat(2, 1fr);
+  }
+
+  .seguridad-card {
+    max-width: 100%;
   }
 }
 

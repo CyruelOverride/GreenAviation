@@ -8,16 +8,8 @@ const RecursosAdicionales = ({ isAuthenticated }) => {
   // Organizar recursos por categorías
   const recursosPorCategoria = {
     manuales: [
-    { 
-      id: 1, 
-        name: 'Manual del Piloto Privado', 
-        type: 'PDF', 
-        size: '18.89 MB',
-        filePath: '/documentos/MANUAL DEL PILOTO PRIVADO.pdf',
-        category: 'manuales'
-      },
       { 
-        id: 2, 
+        id: 1, 
         name: 'Manual Piloto Privado 2026 (con Videos)', 
         type: 'PDF', 
         size: '25 MB',
@@ -25,33 +17,57 @@ const RecursosAdicionales = ({ isAuthenticated }) => {
         category: 'manuales'
       },
       { 
-        id: 3, 
+        id: 2, 
         name: 'Manual Piloto Privado 2026 (con Videos) - Word', 
         type: 'DOCX', 
         size: '30 MB',
         filePath: '/documentos/MANUAL PILOTO PRIVADO 2026-CON VIDEOS FINAL.docx',
         category: 'manuales'
       },
+      { 
+        id: 3, 
+        name: 'P. Privado 2026 con Videos', 
+        type: 'PDF', 
+        size: 'N/A',
+        filePath: '/documentos/P. PRIVADO 2026 CON VIDEOS.pdf',
+        category: 'manuales'
+      },
+      { 
+        id: 4, 
+        name: 'Manual C-150 CX-BFF', 
+        type: 'PDF', 
+        size: 'N/A',
+        filePath: '/documentos/MANUAL C-150 CX-BFF.pdf',
+        category: 'manuales'
+      },
+      { 
+        id: 5, 
+        name: 'Manual C-152 CX-EAP', 
+        type: 'PDF', 
+        size: 'N/A',
+        filePath: '/documentos/MANUAL C-152 CX-EAP.pdf',
+        category: 'manuales'
+      },
     ],
     reglamentos: [
       { 
-        id: 4, 
-      name: 'Código Aeronáutico', 
-      type: 'PDF', 
-      size: '0.13 MB',
+        id: 6, 
+        name: 'Código Aeronáutico', 
+        type: 'PDF', 
+        size: '0.13 MB',
         filePath: '/documentos/CODIGO AERONAUTICO.pdf',
         category: 'reglamentos'
-    },
-    { 
-        id: 5, 
-      name: 'LAR 61 - Licencias', 
-      type: 'PDF', 
-      size: '1.96 MB',
+      },
+      { 
+        id: 7, 
+        name: 'LAR 61 - Licencias', 
+        type: 'PDF', 
+        size: '1.96 MB',
         filePath: '/documentos/LAR 61 LICENCIAS.pdf',
         category: 'reglamentos'
       },
       { 
-        id: 6, 
+        id: 8, 
         name: 'LAR 91 - Operaciones de Vuelo', 
         type: 'PDF', 
         size: '2.5 MB',
@@ -62,7 +78,7 @@ const RecursosAdicionales = ({ isAuthenticated }) => {
     aip: {
       gen: [
         { 
-          id: 7, 
+          id: 9, 
           name: 'AIP GEN 0', 
           type: 'PDF', 
           size: 'N/A',
@@ -70,7 +86,7 @@ const RecursosAdicionales = ({ isAuthenticated }) => {
           category: 'aip'
         },
         { 
-          id: 8, 
+          id: 10, 
           name: 'AIP GEN 1', 
           type: 'PDF', 
           size: 'N/A',
@@ -78,7 +94,7 @@ const RecursosAdicionales = ({ isAuthenticated }) => {
           category: 'aip'
         },
         { 
-          id: 9, 
+          id: 11, 
           name: 'AIP GEN 4', 
           type: 'PDF', 
           size: 'N/A',
@@ -88,7 +104,7 @@ const RecursosAdicionales = ({ isAuthenticated }) => {
       ],
       ad: [
         { 
-          id: 10, 
+          id: 12, 
           name: 'AIP AD 0', 
           type: 'PDF', 
           size: 'N/A',
@@ -96,7 +112,7 @@ const RecursosAdicionales = ({ isAuthenticated }) => {
           category: 'aip'
         },
         { 
-          id: 11, 
+          id: 13, 
           name: 'AIP AD 1', 
           type: 'PDF', 
           size: 'N/A',
@@ -104,7 +120,7 @@ const RecursosAdicionales = ({ isAuthenticated }) => {
           category: 'aip'
         },
         { 
-          id: 12, 
+          id: 14, 
           name: 'AIP AD 2-1', 
           type: 'PDF', 
           size: 'N/A',
@@ -112,7 +128,7 @@ const RecursosAdicionales = ({ isAuthenticated }) => {
           category: 'aip'
         },
         { 
-          id: 13, 
+          id: 15, 
           name: 'AIP AD 2-2', 
           type: 'PDF', 
           size: 'N/A',
@@ -120,7 +136,7 @@ const RecursosAdicionales = ({ isAuthenticated }) => {
           category: 'aip'
         },
         { 
-          id: 14, 
+          id: 16, 
           name: 'AIP AD 2-3', 
           type: 'PDF', 
           size: 'N/A',
@@ -128,7 +144,7 @@ const RecursosAdicionales = ({ isAuthenticated }) => {
           category: 'aip'
         },
         { 
-          id: 15, 
+          id: 17, 
           name: 'AIP AD 2-4', 
           type: 'PDF', 
           size: 'N/A',
@@ -136,7 +152,7 @@ const RecursosAdicionales = ({ isAuthenticated }) => {
           category: 'aip'
         },
         { 
-          id: 16, 
+          id: 18, 
           name: 'AIP AD 2-5', 
           type: 'PDF', 
           size: 'N/A',
@@ -144,7 +160,7 @@ const RecursosAdicionales = ({ isAuthenticated }) => {
           category: 'aip'
         },
         { 
-          id: 17, 
+          id: 19, 
           name: 'AIP AD 2-6', 
           type: 'PDF', 
           size: 'N/A',
@@ -152,7 +168,7 @@ const RecursosAdicionales = ({ isAuthenticated }) => {
           category: 'aip'
         },
         { 
-          id: 18, 
+          id: 20, 
           name: 'AIP AD 2-7', 
           type: 'PDF', 
           size: 'N/A',
@@ -160,7 +176,7 @@ const RecursosAdicionales = ({ isAuthenticated }) => {
           category: 'aip'
         },
         { 
-          id: 19, 
+          id: 21, 
           name: 'AIP AD 2-8', 
           type: 'PDF', 
           size: 'N/A',
@@ -168,7 +184,7 @@ const RecursosAdicionales = ({ isAuthenticated }) => {
           category: 'aip'
         },
         { 
-          id: 20, 
+          id: 22, 
           name: 'AIP AD 2-9', 
           type: 'PDF', 
           size: 'N/A',
@@ -176,7 +192,7 @@ const RecursosAdicionales = ({ isAuthenticated }) => {
           category: 'aip'
         },
         { 
-          id: 21, 
+          id: 23, 
           name: 'AIP AD 2-10', 
           type: 'PDF', 
           size: 'N/A',
@@ -184,7 +200,7 @@ const RecursosAdicionales = ({ isAuthenticated }) => {
           category: 'aip'
         },
         { 
-          id: 22, 
+          id: 24, 
           name: 'AIP AD 2-11', 
           type: 'PDF', 
           size: 'N/A',
@@ -192,7 +208,7 @@ const RecursosAdicionales = ({ isAuthenticated }) => {
           category: 'aip'
         },
         { 
-          id: 23, 
+          id: 25, 
           name: 'AIP AD 2-12', 
           type: 'PDF', 
           size: 'N/A',
@@ -200,7 +216,7 @@ const RecursosAdicionales = ({ isAuthenticated }) => {
           category: 'aip'
         },
         { 
-          id: 24, 
+          id: 26, 
           name: 'AIP AD 2-13', 
           type: 'PDF', 
           size: 'N/A',
@@ -208,7 +224,7 @@ const RecursosAdicionales = ({ isAuthenticated }) => {
           category: 'aip'
         },
         { 
-          id: 25, 
+          id: 27, 
           name: 'AIP AD 2-14 SALTO', 
           type: 'PDF', 
           size: 'N/A',
@@ -216,7 +232,7 @@ const RecursosAdicionales = ({ isAuthenticated }) => {
           category: 'aip'
         },
         { 
-          id: 26, 
+          id: 28, 
           name: 'AIP AD 2-15', 
           type: 'PDF', 
           size: 'N/A',
@@ -224,7 +240,7 @@ const RecursosAdicionales = ({ isAuthenticated }) => {
           category: 'aip'
         },
         { 
-          id: 27, 
+          id: 29, 
           name: 'AIP AD 2-16', 
           type: 'PDF', 
           size: 'N/A',
@@ -232,7 +248,7 @@ const RecursosAdicionales = ({ isAuthenticated }) => {
           category: 'aip'
         },
         { 
-          id: 28, 
+          id: 30, 
           name: 'AIP AD 2-17', 
           type: 'PDF', 
           size: 'N/A',
@@ -242,7 +258,7 @@ const RecursosAdicionales = ({ isAuthenticated }) => {
       ],
       enr: [
         { 
-          id: 29, 
+          id: 31, 
           name: 'AIP ENR 0', 
           type: 'PDF', 
           size: 'N/A',
@@ -250,7 +266,7 @@ const RecursosAdicionales = ({ isAuthenticated }) => {
           category: 'aip'
         },
         { 
-          id: 30, 
+          id: 32, 
           name: 'AIP ENR 1', 
           type: 'PDF', 
           size: 'N/A',
@@ -258,7 +274,7 @@ const RecursosAdicionales = ({ isAuthenticated }) => {
           category: 'aip'
         },
         { 
-          id: 31, 
+          id: 33, 
           name: 'AIP ENR 2', 
           type: 'PDF', 
           size: 'N/A',
@@ -266,7 +282,7 @@ const RecursosAdicionales = ({ isAuthenticated }) => {
           category: 'aip'
         },
         { 
-          id: 32, 
+          id: 34, 
           name: 'AIP ENR 3', 
           type: 'PDF', 
           size: 'N/A',
@@ -274,7 +290,7 @@ const RecursosAdicionales = ({ isAuthenticated }) => {
           category: 'aip'
         },
         { 
-          id: 33, 
+          id: 35, 
           name: 'AIP ENR 4', 
           type: 'PDF', 
           size: 'N/A',
@@ -282,9 +298,9 @@ const RecursosAdicionales = ({ isAuthenticated }) => {
           category: 'aip'
         },
         { 
-          id: 34, 
+          id: 36, 
           name: 'AIP ENR 5', 
-      type: 'PDF', 
+          type: 'PDF', 
           size: 'N/A',
           filePath: '/documentos/AIP/3 ENR/Enr5 (2).pdf',
           category: 'aip'

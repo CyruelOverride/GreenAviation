@@ -86,6 +86,13 @@ export const authAPI = {
   getMe: async () => {
     return apiRequest('/api/auth/me');
   },
+
+  changePassword: async (currentPassword, newPassword) => {
+    return apiRequest('/api/auth/change-password', {
+      method: 'PUT',
+      body: JSON.stringify({ currentPassword, newPassword }),
+    });
+  },
 };
 
 // API de Usuarios
@@ -275,6 +282,91 @@ export const opcionAPI = {
   },
 };
 
+// API de Videos
+export const videoAPI = {
+  // Obtener progreso de videos y exámenes del usuario
+  getProgress: async () => {
+    return apiRequest('/api/videos/progress');
+  },
+
+  // Registrar inicio de visualización de un video
+  startVideo: async (videoNumero) => {
+    return apiRequest(`/api/videos/start/${videoNumero}`, {
+      method: 'POST',
+    });
+  },
+
+  // Verificar si un examen está desbloqueado
+  checkExamUnlock: async (capitulo) => {
+    return apiRequest(`/api/videos/exam-unlock/${capitulo}`);
+  },
+};
+
+// API de Recursos (para gestión de admin)
+export const recursoAPI = {
+  // Obtener todos los recursos
+  getAll: async (filters = {}) => {
+    const queryParams = new URLSearchParams(filters).toString();
+    return apiRequest(`/api/recursos${queryParams ? `?${queryParams}` : ''}`);
+  },
+
+  // Obtener un recurso por ID
+  getById: async (id) => {
+    return apiRequest(`/api/recursos/${id}`);
+  },
+
+  // Crear nuevo recurso (link)
+  create: async (recursoData) => {
+    return apiRequest('/api/recursos', {
+      method: 'POST',
+      body: JSON.stringify(recursoData),
+    });
+  },
+
+  // Subir archivo
+  upload: async (formData) => {
+    const token = localStorage.getItem('token');
+    const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000';
+    
+    const response = await fetch(`${BACKEND_URL}/api/recursos/upload`, {
+      method: 'POST',
+      headers: {
+        ...(token && { Authorization: `Bearer ${token}` }),
+        // No incluir Content-Type, el navegador lo setea automáticamente con el boundary
+      },
+      body: formData,
+    });
+
+    const data = await response.json();
+    
+    if (!response.ok) {
+      throw new Error(data.message || 'Error al subir archivo');
+    }
+
+    return data;
+  },
+
+  // Actualizar recurso
+  update: async (id, recursoData) => {
+    return apiRequest(`/api/recursos/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(recursoData),
+    });
+  },
+
+  // Eliminar recurso
+  delete: async (id) => {
+    return apiRequest(`/api/recursos/${id}`, {
+      method: 'DELETE',
+    });
+  },
+
+  // Obtener categorías
+  getCategorias: async () => {
+    return apiRequest('/api/recursos/categorias');
+  },
+};
+
 export default {
   authAPI,
   userAPI,
@@ -282,5 +374,7 @@ export default {
   examenAPI,
   preguntaAPI,
   opcionAPI,
+  videoAPI,
+  recursoAPI,
 };
 
