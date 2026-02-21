@@ -465,6 +465,53 @@
   background-color: #e5e7eb;
 }
 
+/* Botones de Drive */
+.drive-button-container {
+  display: flex;
+  gap: 4px;
+}
+
+.btn-drive {
+  padding: 8px 12px;
+  background-color: #059669;
+  color: white;
+  border: none;
+  border-radius: 6px 0 0 6px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.btn-drive:hover {
+  background-color: #047857;
+}
+
+.btn-drive.no-link {
+  background-color: #9ca3af;
+}
+
+.btn-drive.no-link:hover {
+  background-color: #6b7280;
+}
+
+.btn-edit-drive {
+  padding: 8px 10px;
+  background-color: #f59e0b;
+  color: white;
+  border: none;
+  border-radius: 0 6px 6px 0;
+  font-size: 12px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.btn-edit-drive:hover {
+  background-color: #d97706;
+}
+
 @media (max-width: 768px) {
   .page-header {
     flex-direction: column;

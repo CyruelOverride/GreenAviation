@@ -9,6 +9,8 @@ const GestionAlumnos = ({ userRole, isAuthenticated }) => {
   const [error, setError] = useState(null);
   const [selectedStudent, setSelectedStudent] = useState(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [editingDriveLink, setEditingDriveLink] = useState(null);
+  const [driveLinkValue, setDriveLinkValue] = useState('');
   const [createFormData, setCreateFormData] = useState({
     email: '',
     password: '',
@@ -102,6 +104,50 @@ const GestionAlumnos = ({ userRole, isAuthenticated }) => {
       alert(err.message || 'Error al exportar el historial del alumno');
       console.error('Error exporting student:', err);
     }
+  };
+
+  // Abrir link de Drive del alumno
+  const handleOpenDrive = (student) => {
+    if (student.driveLink) {
+      window.open(student.driveLink, '_blank', 'noopener,noreferrer');
+    } else {
+      // Si no tiene link, mostrar modal para editarlo
+      setEditingDriveLink(student.id || student._id);
+      setDriveLinkValue('');
+    }
+  };
+
+  // Iniciar edición del link de Drive
+  const handleEditDriveLink = (student, e) => {
+    e.stopPropagation();
+    setEditingDriveLink(student.id || student._id);
+    setDriveLinkValue(student.driveLink || '');
+  };
+
+  // Guardar link de Drive
+  const handleSaveDriveLink = async (studentId) => {
+    try {
+      const response = await userAPI.update(studentId, { driveLink: driveLinkValue });
+      if (response.success) {
+        // Actualizar el estado local
+        setStudents(prev => prev.map(s => 
+          (s.id === studentId || s._id === studentId) 
+            ? { ...s, driveLink: driveLinkValue } 
+            : s
+        ));
+        setEditingDriveLink(null);
+        setDriveLinkValue('');
+      }
+    } catch (err) {
+      alert(err.message || 'Error al guardar el link de Drive');
+      console.error('Error saving drive link:', err);
+    }
+  };
+
+  // Cancelar edición del link de Drive
+  const handleCancelDriveLink = () => {
+    setEditingDriveLink(null);
+    setDriveLinkValue('');
   };
 
   const handleCreateUser = async (e) => {
@@ -352,6 +398,22 @@ const GestionAlumnos = ({ userRole, isAuthenticated }) => {
                         >
                           Exportar
                         </button>
+                        <div className="drive-button-container">
+                          <button 
+                            className={`btn-drive ${student.driveLink ? '' : 'no-link'}`}
+                            onClick={() => handleOpenDrive(student)}
+                            title={student.driveLink ? 'Abrir carpeta en Drive' : 'Sin link configurado'}
+                          >
+                            📁 Drive
+                          </button>
+                          <button 
+                            className="btn-edit-drive"
+                            onClick={(e) => handleEditDriveLink(student, e)}
+                            title="Editar link de Drive"
+                          >
+                            ✏️
+                          </button>
+                        </div>
                       </div>
                     </td>
                   </tr>
@@ -821,6 +883,41 @@ const GestionAlumnos = ({ userRole, isAuthenticated }) => {
         </div>
       )}
 
+      {/* Modal de Editar Link de Drive */}
+      {editingDriveLink && (
+        <div className="student-modal">
+          <div className="modal-content" style={{ maxWidth: '500px' }}>
+            <div className="modal-header">
+              <h2>📁 Editar Link de Drive</h2>
+              <button className="modal-close" onClick={handleCancelDriveLink}>×</button>
+            </div>
+            <div className="modal-body">
+              <div className="form-group">
+                <label>Link de Google Drive del alumno</label>
+                <input
+                  type="url"
+                  value={driveLinkValue}
+                  onChange={(e) => setDriveLinkValue(e.target.value)}
+                  placeholder="https://drive.google.com/drive/folders/..."
+                  style={{ width: '100%', padding: '10px', borderRadius: '6px', border: '1px solid #ddd' }}
+                />
+                <p style={{ fontSize: '12px', color: '#666', marginTop: '8px' }}>
+                  Pega aquí el link de la carpeta de Drive del alumno
+                </p>
+              </div>
+            </div>
+            <div className="modal-footer">
+              <button className="btn-secondary" onClick={handleCancelDriveLink}>
+                Cancelar
+              </button>
+              <button className="btn-primary" onClick={() => handleSaveDriveLink(editingDriveLink)}>
+                Guardar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Modal de Detalles */}
       {selectedStudent && (
         <div className="student-modal">
@@ -893,6 +990,20 @@ const GestionAlumnos = ({ userRole, isAuthenticated }) => {
             </div>
             <div className="modal-footer">
               <button className="btn-secondary" onClick={handleCloseDetails}>Cerrar</button>
+              <button 
+                className={`btn-drive ${selectedStudent.driveLink ? '' : 'no-link'}`}
+                onClick={() => {
+                  if (selectedStudent.driveLink) {
+                    window.open(selectedStudent.driveLink, '_blank', 'noopener,noreferrer');
+                  } else {
+                    handleCloseDetails();
+                    setEditingDriveLink(selectedStudent.id || selectedStudent._id);
+                    setDriveLinkValue('');
+                  }
+                }}
+              >
+                📁 {selectedStudent.driveLink ? 'Ver en Drive' : 'Agregar Link Drive'}
+              </button>
               <button className="btn-export" onClick={() => handleExportStudent(selectedStudent)}>
                 Exportar a Excel
               </button>
