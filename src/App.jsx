@@ -16,6 +16,10 @@ import Login from './pages/Login/Login';
 import { authAPI } from './services/api';
 import './App.css';
 
+// ========== TEMPORAL: Bypass login admin para corroborar el front. BORRAR en producción. ==========
+const BYPASS_ADMIN_LOGIN = true;
+// ========== Fin bypass temporal ==========
+
 function App() {
   const [isAuthenticated, setIsAuthenticated] = React.useState(false);
   const [userRole, setUserRole] = React.useState(null);
@@ -25,6 +29,16 @@ function App() {
   // Verificar si hay un token guardado al cargar la app
   React.useEffect(() => {
     const checkAuth = async () => {
+      // TEMPORAL: bypass admin — quitar este if al volver a usar login real
+      if (BYPASS_ADMIN_LOGIN) {
+        localStorage.setItem('token', 'bypass-dev');
+        localStorage.setItem('user', JSON.stringify({ role: 'admin', email: 'admin@bypass' }));
+        setIsAuthenticated(true);
+        setUserRole('admin');
+        setLoading(false);
+        return;
+      }
+
       const token = localStorage.getItem('token');
       const savedUser = localStorage.getItem('user');
 
@@ -138,7 +152,7 @@ function App() {
               />
               <Route 
                 path="/clases-online" 
-                element={<ClasesOnline isAuthenticated={isAuthenticated} />}
+                element={<ClasesOnline isAuthenticated={isAuthenticated} userRole={userRole} />}
               />
             </Routes>
           </main>

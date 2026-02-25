@@ -1,67 +1,268 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { claseOnlineAPI, userAPI } from '../../services/api';
 import './ClasesOnline.css';
 
-const ClasesOnline = ({ isAuthenticated }) => {
-  const upcomingClasses = [
-    {
-      id: 1,
-      title: 'Clase: Introducción a la Meteorología',
-      date: '2024-02-15',
-      time: '18:00',
-      platform: 'Zoom',
-      link: 'https://zoom.us/j/123456789',
-      module: 'Módulo 3'
-    },
-    {
-      id: 2,
-      title: 'Clase: Navegación y Planificación',
-      date: '2024-02-20',
-      time: '18:00',
-      platform: 'Google Meet',
-      link: 'https://meet.google.com/abc-defg-hij',
-      module: 'Módulo 4'
-    },
-    {
-      id: 3,
-      title: 'Clase: Regulaciones y Procedimientos',
-      date: '2024-02-25',
-      time: '18:00',
-      platform: 'Zoom',
-      link: 'https://zoom.us/j/987654321',
-      module: 'Módulo 5'
-    },
-  ];
+const ClasesOnline = ({ isAuthenticated, userRole }) => {
+  const [clases, setClases] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [showGrabacionModal, setShowGrabacionModal] = useState(false);
+  const [selectedClase, setSelectedClase] = useState(null);
+  const [instructors, setInstructors] = useState([]);
+  const [filterEstado, setFilterEstado] = useState('');
 
-  const pastClasses = [
-    {
-      id: 4,
-      title: 'Clase: Principios de Vuelo',
-      date: '2024-02-10',
-      time: '18:00',
-      platform: 'Zoom',
-      recording: 'https://drive.google.com/recording1',
-      module: 'Módulo 2'
-    },
-    {
-      id: 5,
-      title: 'Clase: Introducción a la Aviación',
-      date: '2024-02-05',
-      time: '18:00',
-      platform: 'Google Meet',
-      recording: 'https://drive.google.com/recording2',
-      module: 'Módulo 1'
-    },
-  ];
+  // Estado del formulario
+  const [formData, setFormData] = useState({
+    link: '',
+    fechaHoraInicio: new Date().toISOString().slice(0, 16),
+    fechaHoraFin: '',
+    instructorId: '',
+    estado: 'Pendiente'
+  });
 
-  const formatDate = (dateString) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('es-ES', { 
-      weekday: 'long', 
-      year: 'numeric', 
-      month: 'long', 
-      day: 'numeric' 
+  const [grabacionData, setGrabacionData] = useState({
+    linkGrabacion: '',
+    estado: 'Grabacion'
+  });
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      fetchClases();
+      if (userRole === 'admin') {
+        fetchInstructors();
+      }
+    }
+  }, [isAuthenticated, userRole, filterEstado]);
+
+  const fetchClases = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const filters = filterEstado ? { estado: filterEstado } : {};
+      const response = await claseOnlineAPI.getAll(filters);
+      if (response.success) {
+        setClases(response.data.clases || []);
+      }
+    } catch (err) {
+      setError(err.message || 'Error al cargar las clases online');
+      console.error('Error:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchInstructors = async () => {
+    try {
+      const response = await userAPI.getAll({ role: 'admin' });
+      if (response.success && response.data.users) {
+        setInstructors(response.data.users);
+      }
+    } catch (err) {
+      console.error('Error al cargar instructores:', err);
+    }
+  };
+
+  const handleCreateClase = async (e) => {
+    e.preventDefault();
+    try {
+      const claseData = {
+        link: formData.link,
+        fechaHoraInicio: formData.fechaHoraInicio,
+        fechaHoraFin: formData.fechaHoraFin || null,
+        instructorId: formData.instructorId || null
+      };
+
+      await claseOnlineAPI.create(claseData);
+      alert('Clase online creada exitosamente!');
+      setShowCreateModal(false);
+      resetForm();
+      fetchClases();
+    } catch (err) {
+      alert(`Error al crear clase: ${err.message}`);
+    }
+  };
+
+  const handleUpdateClase = async (e) => {
+    e.preventDefault();
+    if (!selectedClase) return;
+
+    try {
+      // Si la clase está terminada y se quiere cambiar a Grabacion
+      if (selectedClase.estado === 'Terminada' && formData.estado === 'Grabacion') {
+        const updateData = {
+          estado: 'Grabacion',
+          linkGrabacion: formData.linkGrabacion || selectedClase.linkGrabacion
+        };
+        await claseOnlineAPI.update(selectedClase.id, updateData);
+      } else if (selectedClase.estado !== 'Terminada') {
+        // Solo se puede modificar si no está terminada
+        const updateData = {
+          link: formData.link,
+          fechaHoraInicio: formData.fechaHoraInicio,
+          fechaHoraFin: formData.fechaHoraFin || null,
+          estado: formData.estado,
+          instructorId: formData.instructorId || null
+        };
+        await claseOnlineAPI.update(selectedClase.id, updateData);
+      } else {
+        alert('No se puede modificar una clase terminada. Solo se puede cambiar a "Grabacion"');
+        return;
+      }
+
+      alert('Clase online actualizada exitosamente!');
+      setShowEditModal(false);
+      setSelectedClase(null);
+      resetForm();
+      fetchClases();
+    } catch (err) {
+      alert(`Error al actualizar clase: ${err.message}`);
+    }
+  };
+
+  const handleDeleteClase = async (id) => {
+    if (!window.confirm('¿Estás seguro de que deseas eliminar esta clase?')) {
+      return;
+    }
+
+    try {
+      await claseOnlineAPI.delete(id);
+      alert('Clase eliminada exitosamente!');
+      fetchClases();
+    } catch (err) {
+      alert(`Error al eliminar clase: ${err.message}`);
+    }
+  };
+
+  const handleChangeEstado = async (clase, nuevoEstado) => {
+    try {
+      await claseOnlineAPI.update(clase.id, { estado: nuevoEstado });
+      alert(`Estado cambiado a "${nuevoEstado}" exitosamente!`);
+      fetchClases();
+    } catch (err) {
+      alert(`Error al cambiar estado: ${err.message}`);
+    }
+  };
+
+  const handleRegistrarAlumno = async (claseId) => {
+    try {
+      await claseOnlineAPI.registrarAlumno(claseId);
+      alert('Te has registrado en la clase exitosamente!');
+      fetchClases();
+    } catch (err) {
+      alert(`Error al registrarse: ${err.message}`);
+    }
+  };
+
+  const handleOpenClase = async (clase) => {
+    // Si el usuario no es admin, registrarse automáticamente
+    if (userRole !== 'admin') {
+      const savedUser = localStorage.getItem('user');
+      if (savedUser) {
+        try {
+          const user = JSON.parse(savedUser);
+          const userId = user.id || user._id;
+          const isRegistrado = clase.alumnos?.some(a => (a.id === userId) || (a._id === userId));
+          if (!isRegistrado) {
+            await handleRegistrarAlumno(clase.id);
+          }
+        } catch (err) {
+          console.error('Error al parsear usuario:', err);
+        }
+      }
+    }
+    // Abrir el link en nueva pestaña
+    window.open(clase.link, '_blank', 'noopener,noreferrer');
+  };
+
+  const handleOpenGrabacion = (clase) => {
+    if (clase.linkGrabacion) {
+      window.open(clase.linkGrabacion, '_blank', 'noopener,noreferrer');
+    }
+  };
+
+  const handleEditClick = (clase) => {
+    setSelectedClase(clase);
+    setFormData({
+      link: clase.link || '',
+      fechaHoraInicio: clase.fechaHoraInicio 
+        ? new Date(clase.fechaHoraInicio).toISOString().slice(0, 16)
+        : new Date().toISOString().slice(0, 16),
+      fechaHoraFin: clase.fechaHoraFin 
+        ? new Date(clase.fechaHoraFin).toISOString().slice(0, 16)
+        : '',
+      instructorId: clase.instructorId || '',
+      estado: clase.estado || 'Pendiente',
+      linkGrabacion: clase.linkGrabacion || ''
     });
+    setShowEditModal(true);
+  };
+
+  const handleViewDetails = (clase) => {
+    setSelectedClase(clase);
+    setShowDetailsModal(true);
+  };
+
+  const handleGrabacionClick = (clase) => {
+    setSelectedClase(clase);
+    setGrabacionData({
+      linkGrabacion: clase.linkGrabacion || '',
+      estado: 'Grabacion'
+    });
+    setShowGrabacionModal(true);
+  };
+
+  const handleSaveGrabacion = async (e) => {
+    e.preventDefault();
+    if (!selectedClase) return;
+
+    try {
+      await claseOnlineAPI.update(selectedClase.id, {
+        estado: 'Grabacion',
+        linkGrabacion: grabacionData.linkGrabacion
+      });
+      alert('Grabación guardada exitosamente!');
+      setShowGrabacionModal(false);
+      setSelectedClase(null);
+      fetchClases();
+    } catch (err) {
+      alert(`Error al guardar grabación: ${err.message}`);
+    }
+  };
+
+  const resetForm = () => {
+    setFormData({
+      link: '',
+      fechaHoraInicio: new Date().toISOString().slice(0, 16),
+      fechaHoraFin: '',
+      instructorId: '',
+      estado: 'Pendiente'
+    });
+  };
+
+  const formatDateTime = (dateString) => {
+    if (!dateString) return 'N/A';
+    const date = new Date(dateString);
+    return date.toLocaleString('es-ES', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
+
+  const getEstadoBadgeClass = (estado) => {
+    const estados = {
+      'Pendiente': 'estado-pendiente',
+      'En curso': 'estado-en-curso',
+      'Terminada': 'estado-terminada',
+      'Grabacion': 'estado-grabacion'
+    };
+    return estados[estado] || '';
   };
 
   if (!isAuthenticated) {
@@ -70,112 +271,434 @@ const ClasesOnline = ({ isAuthenticated }) => {
         <h1 className="page-title">Clases Online</h1>
         <div className="info-card-unauthenticated">
           <h2>🎓 Clases Online</h2>
-          <p>En esta sección encontrarás:</p>
-          <ul>
-            <li>Acceso a enlaces de plataformas de aula virtual (Zoom, Google Meet)</li>
-            <li>Organización por fechas o módulos</li>
-            <li>Acceso rápido desde el panel del alumno</li>
-            <li>Grabaciones de clases anteriores</li>
-            <li>Calendario de próximas clases</li>
-            <li>Información de plataformas y horarios</li>
-          </ul>
-          <p className="auth-prompt">Inicia sesión para acceder a las clases online</p>
+          <p>Inicia sesión para acceder a las clases online</p>
           <Link to="/login" className="btn-primary">Iniciar Sesión</Link>
         </div>
       </div>
     );
   }
 
+  if (loading) {
+    return (
+      <div className="clases-online">
+        <div className="loading">Cargando clases online...</div>
+      </div>
+    );
+  }
+
   return (
     <div className="clases-online">
-      <h1 className="page-title">Clases Online</h1>
-      <p className="page-description">
-        Accede a las clases en vivo y grabaciones de sesiones anteriores.
-      </p>
+      <div className="clases-header">
+        <h1 className="page-title">Clases Online</h1>
+        {userRole === 'admin' && (
+          <button 
+            className="btn-primary"
+            onClick={() => {
+              resetForm();
+              setShowCreateModal(true);
+            }}
+          >
+            + Crear Nueva Clase
+          </button>
+        )}
+      </div>
 
-      <div className="upcoming-section">
-        <h2 className="section-title">Próximas Clases</h2>
+      {userRole === 'admin' && (
+        <div className="filters-section">
+          <div className="filter-group">
+            <label htmlFor="estado-filter">Filtrar por Estado:</label>
+            <select
+              id="estado-filter"
+              value={filterEstado}
+              onChange={(e) => setFilterEstado(e.target.value)}
+              className="filter-select"
+            >
+              <option value="">Todos los estados</option>
+              <option value="Pendiente">Pendiente</option>
+              <option value="En curso">En curso</option>
+              <option value="Terminada">Terminada</option>
+              <option value="Grabacion">Grabación</option>
+            </select>
+          </div>
+          <div className="stats-info">
+            <span>Total de clases: <strong>{clases.length}</strong></span>
+          </div>
+        </div>
+      )}
+
+      {error && (
+        <div className="error-message">{error}</div>
+      )}
+
+      {clases.length === 0 ? (
+        <div className="empty-message">No hay clases online disponibles.</div>
+      ) : (
         <div className="classes-grid">
-          {upcomingClasses.map(classItem => (
-            <div key={classItem.id} className="class-card upcoming">
+          {clases.map(clase => (
+            <div key={clase.id} className={`class-card ${clase.estado?.toLowerCase().replace(' ', '-')}`}>
               <div className="class-header">
-                <div className="class-badge upcoming-badge">Próxima</div>
-                <span className="class-module">{classItem.module}</span>
+                <span className={`class-badge ${getEstadoBadgeClass(clase.estado)}`}>
+                  {clase.estado}
+                </span>
+                {userRole === 'admin' && (
+                  <div className="class-actions">
+                    <button 
+                      className="btn-icon"
+                      onClick={() => handleViewDetails(clase)}
+                      title="Ver detalles"
+                    >
+                      👁️
+                    </button>
+                    {clase.estado !== 'Terminada' && (
+                      <button 
+                        className="btn-icon"
+                        onClick={() => handleEditClick(clase)}
+                        title="Editar"
+                      >
+                        ✏️
+                      </button>
+                    )}
+                    {clase.estado === 'Terminada' && (
+                      <button 
+                        className="btn-icon"
+                        onClick={() => handleGrabacionClick(clase)}
+                        title="Agregar grabación"
+                      >
+                        🎥
+                      </button>
+                    )}
+                    <button 
+                      className="btn-icon btn-danger"
+                      onClick={() => handleDeleteClase(clase.id)}
+                      title="Eliminar"
+                    >
+                      🗑️
+                    </button>
+                  </div>
+                )}
               </div>
-              <h3>{classItem.title}</h3>
+
               <div className="class-details">
                 <div className="detail-item">
                   <span className="detail-icon">📅</span>
-                  <span>{formatDate(classItem.date)}</span>
+                  <span>{formatDateTime(clase.fechaHoraInicio)}</span>
                 </div>
-                <div className="detail-item">
-                  <span className="detail-icon">🕐</span>
-                  <span>{classItem.time} (GMT-3)</span>
-                </div>
-                <div className="detail-item">
-                  <span className="detail-icon">💻</span>
-                  <span>{classItem.platform}</span>
-                </div>
+                {clase.fechaHoraFin && (
+                  <div className="detail-item">
+                    <span className="detail-icon">🕐</span>
+                    <span>Hasta: {formatDateTime(clase.fechaHoraFin)}</span>
+                  </div>
+                )}
+                {clase.instructor && (
+                  <div className="detail-item">
+                    <span className="detail-icon">👤</span>
+                    <span>Instructor: {clase.instructor.nombre} {clase.instructor.apellido}</span>
+                  </div>
+                )}
+                {clase.alumnos && clase.alumnos.length > 0 && (
+                  <div className="detail-item">
+                    <span className="detail-icon">👥</span>
+                    <span>{clase.alumnos.length} alumno(s) registrado(s)</span>
+                  </div>
+                )}
               </div>
-              <a 
-                href={classItem.link} 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="btn-join"
-              >
-                Unirse a la Clase
-              </a>
+
+              <div className="class-actions-bottom">
+                {clase.estado === 'Pendiente' && userRole === 'admin' && (
+                  <button
+                    className="btn-secondary"
+                    onClick={() => handleChangeEstado(clase, 'En curso')}
+                  >
+                    Iniciar Clase
+                  </button>
+                )}
+                {clase.estado === 'En curso' && (
+                  <button
+                    className="btn-join"
+                    onClick={() => handleOpenClase(clase)}
+                  >
+                    Unirse a la Clase
+                  </button>
+                )}
+                {clase.estado === 'Terminada' && clase.linkGrabacion && (
+                  <button
+                    className="btn-watch"
+                    onClick={() => handleOpenGrabacion(clase)}
+                  >
+                    Ver Grabación
+                  </button>
+                )}
+                {clase.estado === 'Grabacion' && clase.linkGrabacion && (
+                  <button
+                    className="btn-watch"
+                    onClick={() => handleOpenGrabacion(clase)}
+                  >
+                    Ver Grabación
+                  </button>
+                )}
+                {clase.estado === 'Pendiente' && userRole !== 'admin' && (
+                  <button
+                    className="btn-join"
+                    onClick={() => handleOpenClase(clase)}
+                  >
+                    Ver Clase
+                  </button>
+                )}
+              </div>
             </div>
           ))}
         </div>
-      </div>
+      )}
 
-      <div className="past-section">
-        <h2 className="section-title">Clases Anteriores</h2>
-        <div className="classes-grid">
-          {pastClasses.map(classItem => (
-            <div key={classItem.id} className="class-card past">
-              <div className="class-header">
-                <div className="class-badge past-badge">Finalizada</div>
-                <span className="class-module">{classItem.module}</span>
-              </div>
-              <h3>{classItem.title}</h3>
-              <div className="class-details">
-                <div className="detail-item">
-                  <span className="detail-icon">📅</span>
-                  <span>{formatDate(classItem.date)}</span>
-                </div>
-                <div className="detail-item">
-                  <span className="detail-icon">💻</span>
-                  <span>{classItem.platform}</span>
-                </div>
-              </div>
-              <a 
-                href={classItem.recording} 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="btn-watch"
-              >
-                Ver Grabación
-              </a>
+      {/* Modal Crear Clase */}
+      {showCreateModal && (
+        <div className="modal-overlay" onClick={() => setShowCreateModal(false)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2>Crear Nueva Clase Online</h2>
+              <button className="close-btn" onClick={() => setShowCreateModal(false)}>×</button>
             </div>
-          ))}
+            <form onSubmit={handleCreateClase} className="clase-form">
+              <div className="form-group">
+                <label>Link de la Clase *</label>
+                <input
+                  type="url"
+                  value={formData.link}
+                  onChange={(e) => setFormData({ ...formData, link: e.target.value })}
+                  placeholder="https://zoom.us/j/..."
+                  required
+                />
+              </div>
+              <div className="form-group">
+                <label>Fecha y Hora de Inicio *</label>
+                <input
+                  type="datetime-local"
+                  value={formData.fechaHoraInicio}
+                  onChange={(e) => setFormData({ ...formData, fechaHoraInicio: e.target.value })}
+                  required
+                />
+              </div>
+              <div className="form-group">
+                <label>Fecha y Hora de Fin</label>
+                <input
+                  type="datetime-local"
+                  value={formData.fechaHoraFin}
+                  onChange={(e) => setFormData({ ...formData, fechaHoraFin: e.target.value })}
+                />
+              </div>
+              <div className="form-group">
+                <label>Instructor</label>
+                <select
+                  value={formData.instructorId}
+                  onChange={(e) => setFormData({ ...formData, instructorId: e.target.value })}
+                >
+                  <option value="">Seleccionar instructor (opcional)</option>
+                  {instructors.map(instructor => (
+                    <option key={instructor.id} value={instructor.id}>
+                      {instructor.nombre} {instructor.apellido}
+                    </option>
+                  ))}
+                </select>
+                <small>Si no se selecciona, se usará el usuario logueado</small>
+              </div>
+              <div className="form-actions">
+                <button type="button" onClick={() => setShowCreateModal(false)} className="btn-secondary">
+                  Cancelar
+                </button>
+                <button type="submit" className="btn-primary">
+                  Crear Clase
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
-      </div>
+      )}
 
-      <div className="info-section">
-        <div className="info-card">
-          <h3>Plataformas de Videoconferencia</h3>
-          <p>
-            Las clases se realizan a través de Zoom o Google Meet. Los enlaces de acceso 
-            estarán disponibles antes de cada sesión. Las grabaciones se almacenan en 
-            Google Drive y estarán disponibles después de cada clase.
-          </p>
+      {/* Modal Editar Clase */}
+      {showEditModal && selectedClase && (
+        <div className="modal-overlay" onClick={() => setShowEditModal(false)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2>Editar Clase Online</h2>
+              <button className="close-btn" onClick={() => setShowEditModal(false)}>×</button>
+            </div>
+            <form onSubmit={handleUpdateClase} className="clase-form">
+              {selectedClase.estado === 'Terminada' ? (
+                <div className="form-group">
+                  <label>Link de Grabación *</label>
+                  <input
+                    type="url"
+                    value={formData.linkGrabacion}
+                    onChange={(e) => setFormData({ ...formData, linkGrabacion: e.target.value })}
+                    placeholder="https://drive.google.com/..."
+                    required
+                  />
+                  <small>Al guardar, la clase cambiará a estado "Grabacion"</small>
+                </div>
+              ) : (
+                <>
+                  <div className="form-group">
+                    <label>Link de la Clase *</label>
+                    <input
+                      type="url"
+                      value={formData.link}
+                      onChange={(e) => setFormData({ ...formData, link: e.target.value })}
+                      required
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>Fecha y Hora de Inicio *</label>
+                    <input
+                      type="datetime-local"
+                      value={formData.fechaHoraInicio}
+                      onChange={(e) => setFormData({ ...formData, fechaHoraInicio: e.target.value })}
+                      required
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>Fecha y Hora de Fin</label>
+                    <input
+                      type="datetime-local"
+                      value={formData.fechaHoraFin}
+                      onChange={(e) => setFormData({ ...formData, fechaHoraFin: e.target.value })}
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>Estado</label>
+                    <select
+                      value={formData.estado}
+                      onChange={(e) => setFormData({ ...formData, estado: e.target.value })}
+                    >
+                      <option value="Pendiente">Pendiente</option>
+                      <option value="En curso">En curso</option>
+                      <option value="Terminada">Terminada</option>
+                    </select>
+                  </div>
+                  <div className="form-group">
+                    <label>Instructor</label>
+                    <select
+                      value={formData.instructorId}
+                      onChange={(e) => setFormData({ ...formData, instructorId: e.target.value })}
+                    >
+                      <option value="">Seleccionar instructor</option>
+                      {instructors.map(instructor => (
+                        <option key={instructor.id} value={instructor.id}>
+                          {instructor.nombre} {instructor.apellido}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </>
+              )}
+              <div className="form-actions">
+                <button type="button" onClick={() => setShowEditModal(false)} className="btn-secondary">
+                  Cancelar
+                </button>
+                <button type="submit" className="btn-primary">
+                  Guardar Cambios
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
-      </div>
+      )}
+
+      {/* Modal Ver Detalles */}
+      {showDetailsModal && selectedClase && (
+        <div className="modal-overlay" onClick={() => setShowDetailsModal(false)}>
+          <div className="modal-content modal-large" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2>Detalles de la Clase</h2>
+              <button className="close-btn" onClick={() => setShowDetailsModal(false)}>×</button>
+            </div>
+            <div className="details-content">
+              <div className="detail-row">
+                <strong>Estado:</strong>
+                <span className={`estado-badge ${getEstadoBadgeClass(selectedClase.estado)}`}>
+                  {selectedClase.estado}
+                </span>
+              </div>
+              <div className="detail-row">
+                <strong>Link:</strong>
+                <a href={selectedClase.link} target="_blank" rel="noopener noreferrer">
+                  {selectedClase.link}
+                </a>
+              </div>
+              {selectedClase.linkGrabacion && (
+                <div className="detail-row">
+                  <strong>Link de Grabación:</strong>
+                  <a href={selectedClase.linkGrabacion} target="_blank" rel="noopener noreferrer">
+                    {selectedClase.linkGrabacion}
+                  </a>
+                </div>
+              )}
+              <div className="detail-row">
+                <strong>Fecha y Hora de Inicio:</strong>
+                <span>{formatDateTime(selectedClase.fechaHoraInicio)}</span>
+              </div>
+              {selectedClase.fechaHoraFin && (
+                <div className="detail-row">
+                  <strong>Fecha y Hora de Fin:</strong>
+                  <span>{formatDateTime(selectedClase.fechaHoraFin)}</span>
+                </div>
+              )}
+              {selectedClase.instructor && (
+                <div className="detail-row">
+                  <strong>Instructor:</strong>
+                  <span>{selectedClase.instructor.nombre} {selectedClase.instructor.apellido}</span>
+                </div>
+              )}
+              {selectedClase.alumnos && selectedClase.alumnos.length > 0 && (
+                <div className="detail-row">
+                  <strong>Alumnos Registrados ({selectedClase.alumnos.length}):</strong>
+                  <div className="alumnos-list">
+                    {selectedClase.alumnos.map(alumno => (
+                      <div key={alumno.id} className="alumno-item">
+                        {alumno.nombre} {alumno.apellido} ({alumno.email})
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Agregar Grabación */}
+      {showGrabacionModal && selectedClase && (
+        <div className="modal-overlay" onClick={() => setShowGrabacionModal(false)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2>Agregar Grabación</h2>
+              <button className="close-btn" onClick={() => setShowGrabacionModal(false)}>×</button>
+            </div>
+            <form onSubmit={handleSaveGrabacion} className="clase-form">
+              <div className="form-group">
+                <label>Link de Grabación *</label>
+                <input
+                  type="url"
+                  value={grabacionData.linkGrabacion}
+                  onChange={(e) => setGrabacionData({ ...grabacionData, linkGrabacion: e.target.value })}
+                  placeholder="https://drive.google.com/..."
+                  required
+                />
+                <small>Al guardar, la clase cambiará a estado "Grabacion"</small>
+              </div>
+              <div className="form-actions">
+                <button type="button" onClick={() => setShowGrabacionModal(false)} className="btn-secondary">
+                  Cancelar
+                </button>
+                <button type="submit" className="btn-primary">
+                  Guardar Grabación
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
 
 export default ClasesOnline;
-

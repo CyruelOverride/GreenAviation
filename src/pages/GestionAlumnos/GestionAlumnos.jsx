@@ -8,6 +8,8 @@ const GestionAlumnos = ({ userRole, isAuthenticated }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedStudent, setSelectedStudent] = useState(null);
+  const [historialAlumno, setHistorialAlumno] = useState(null);
+  const [loadingHistorial, setLoadingHistorial] = useState(false);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [editingDriveLink, setEditingDriveLink] = useState(null);
   const [driveLinkValue, setDriveLinkValue] = useState('');
@@ -82,12 +84,26 @@ const GestionAlumnos = ({ userRole, isAuthenticated }) => {
   };
 
 
-  const handleViewDetails = (student) => {
+  const handleViewDetails = async (student) => {
     setSelectedStudent(student);
+    setHistorialAlumno(null);
+    setLoadingHistorial(true);
+    const studentId = student.id || student._id;
+    try {
+      const response = await userAPI.getHistorial(studentId);
+      if (response.success && response.data) {
+        setHistorialAlumno(response.data);
+      }
+    } catch (err) {
+      console.error('Error al cargar historial:', err);
+    } finally {
+      setLoadingHistorial(false);
+    }
   };
 
   const handleCloseDetails = () => {
     setSelectedStudent(null);
+    setHistorialAlumno(null);
   };
 
   const handleExportStudent = async (student) => {
@@ -921,76 +937,191 @@ const GestionAlumnos = ({ userRole, isAuthenticated }) => {
       {/* Modal de Detalles */}
       {selectedStudent && (
         <div className="student-modal">
-          <div className="modal-content">
+          <div className="modal-content modal-content-details">
             <div className="modal-header">
-              <h2>Información Completa - {`${selectedStudent.nombre || ''} ${selectedStudent.apellido || ''}`.trim() || 'Alumno'}</h2>
+              <h2>Detalle del alumno — {`${selectedStudent.nombre || ''} ${selectedStudent.apellido || ''}`.trim() || 'Alumno'}</h2>
               <button className="modal-close" onClick={handleCloseDetails}>×</button>
             </div>
             <div className="modal-body">
-              <div className="student-details">
-                <div className="detail-row">
-                  <label>ID:</label>
-                  <span>{selectedStudent._id?.toString() || selectedStudent.id}</span>
+              <section className="student-details">
+                <h3 className="details-section-title">Datos personales</h3>
+                <div className="detail-grid">
+                  <div className="detail-row">
+                    <label>ID</label>
+                    <span>{selectedStudent._id?.toString() || selectedStudent.id}</span>
+                  </div>
+                  <div className="detail-row">
+                    <label>Nombre</label>
+                    <span>{selectedStudent.nombre || '-'}</span>
+                  </div>
+                  <div className="detail-row">
+                    <label>Apellido</label>
+                    <span>{selectedStudent.apellido || '-'}</span>
+                  </div>
+                  <div className="detail-row">
+                    <label>Email</label>
+                    <span>{selectedStudent.email}</span>
+                  </div>
+                  <div className="detail-row">
+                    <label>Cédula</label>
+                    <span>{selectedStudent.cedula || '-'}</span>
+                  </div>
+                  <div className="detail-row">
+                    <label>Teléfono</label>
+                    <span>{selectedStudent.numeroTelefono || '-'}</span>
+                  </div>
+                  <div className="detail-row">
+                    <label>Progreso</label>
+                    <span>{selectedStudent.progreso ?? 0}%</span>
+                  </div>
+                  <div className="detail-row">
+                    <label>Estado</label>
+                    <span className={`status-badge ${(selectedStudent.estado || 'Cursando').toLowerCase()}`}>
+                      {selectedStudent.estado || 'Cursando'}
+                    </span>
+                  </div>
+                  <div className="detail-row">
+                    <label>Último acceso</label>
+                    <span>
+                      {selectedStudent.ultimoAcceso
+                        ? new Date(selectedStudent.ultimoAcceso).toLocaleDateString()
+                        : '-'}
+                    </span>
+                  </div>
                 </div>
-                <div className="detail-row">
-                  <label>Nombre:</label>
-                  <span>{selectedStudent.nombre || '-'}</span>
-                </div>
-                <div className="detail-row">
-                  <label>Apellido:</label>
-                  <span>{selectedStudent.apellido || '-'}</span>
-                </div>
-                <div className="detail-row">
-                  <label>Email:</label>
-                  <span>{selectedStudent.email}</span>
-                </div>
-                <div className="detail-row">
-                  <label>Cédula:</label>
-                  <span>{selectedStudent.cedula || '-'}</span>
-                </div>
-                <div className="detail-row">
-                  <label>Teléfono:</label>
-                  <span>{selectedStudent.numeroTelefono || '-'}</span>
-                </div>
-                <div className="detail-row">
-                  <label>Edad:</label>
-                  <span>{selectedStudent.edad || '-'}</span>
-                </div>
-                <div className="detail-row">
-                  <label>Progreso:</label>
-                  <span>{selectedStudent.progreso || 0}%</span>
-                </div>
-                <div className="detail-row">
-                  <label>Estado:</label>
-                  <span className={`status-badge ${(selectedStudent.estado || 'Cursando').toLowerCase()}`}>
-                    {selectedStudent.estado || 'Cursando'}
-                  </span>
-                </div>
-                <div className="detail-row">
-                  <label>Curso:</label>
-                  <span>{selectedStudent.curso || 'Piloto Privado'}</span>
-                </div>
-                <div className="detail-row">
-                  <label>Fecha de Inscripción:</label>
-                  <span>
-                    {selectedStudent.fechaInicioCurso 
-                      ? new Date(selectedStudent.fechaInicioCurso).toLocaleDateString() 
-                      : '-'}
-                  </span>
-                </div>
-                <div className="detail-row">
-                  <label>Último Acceso:</label>
-                  <span>
-                    {selectedStudent.ultimoAcceso 
-                      ? new Date(selectedStudent.ultimoAcceso).toLocaleDateString() 
-                      : '-'}
-                  </span>
-                </div>
-              </div>
+              </section>
+
+              {loadingHistorial ? (
+                <div className="historial-loading">Cargando historial…</div>
+              ) : historialAlumno && (
+                <>
+                  <section className="historial-section">
+                    <h3 className="details-section-title">Exámenes realizados</h3>
+                    {historialAlumno.examenes?.length > 0 ? (
+                      <div className="historial-table-wrap">
+                        <table className="historial-table">
+                          <thead>
+                            <tr>
+                              <th>Nombre</th>
+                              <th>Capítulo</th>
+                              <th>Fecha</th>
+                              <th>Puntaje</th>
+                              <th>Estado</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {historialAlumno.examenes.map((ex) => (
+                              <tr key={ex.id}>
+                                <td>{ex.nombre || '-'}</td>
+                                <td>{ex.capitulo || '-'}</td>
+                                <td>
+                                  {ex.fechaFinalizacion
+                                    ? new Date(ex.fechaFinalizacion).toLocaleDateString()
+                                    : ex.fechaCreacion
+                                      ? new Date(ex.fechaCreacion).toLocaleDateString()
+                                      : '-'}
+                                </td>
+                                <td>{ex.puntaje != null ? ex.puntaje : '-'}</td>
+                                <td>
+                                  <span className={`status-badge ${(ex.estado || '').toLowerCase()}`}>
+                                    {ex.estado || '-'}
+                                  </span>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    ) : (
+                      <p className="historial-empty">No hay exámenes registrados.</p>
+                    )}
+                  </section>
+
+                  <section className="historial-section">
+                    <h3 className="details-section-title">Videos vistos</h3>
+                    {historialAlumno.videosVistos?.length > 0 ? (
+                      <div className="historial-table-wrap">
+                        <table className="historial-table">
+                          <thead>
+                            <tr>
+                              <th>Video</th>
+                              <th>Fecha de visualización</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {historialAlumno.videosVistos.map((v) => (
+                              <tr key={v.id}>
+                                <td>Video #{v.videoNumero}</td>
+                                <td>
+                                  {v.startedAt
+                                    ? new Date(v.startedAt).toLocaleString()
+                                    : '-'}
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    ) : (
+                      <p className="historial-empty">No hay videos vistos registrados.</p>
+                    )}
+                  </section>
+
+                  <section className="historial-section">
+                    <h3 className="details-section-title">Clases ingresadas</h3>
+                    {historialAlumno.clasesIngresadas?.length > 0 ? (
+                      <div className="historial-table-wrap">
+                        <table className="historial-table">
+                          <thead>
+                            <tr>
+                              <th>Fecha clase</th>
+                              <th>Estado</th>
+                              <th>Instructor</th>
+                              <th>Enlace</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {historialAlumno.clasesIngresadas.map((c) => (
+                              <tr key={c.id}>
+                                <td>
+                                  {c.fechaHoraInicio
+                                    ? new Date(c.fechaHoraInicio).toLocaleString()
+                                    : c.fechaRegistro
+                                      ? new Date(c.fechaRegistro).toLocaleString()
+                                      : '-'}
+                                </td>
+                                <td>
+                                  <span className={`status-badge ${(c.estado || '').toLowerCase()}`}>
+                                    {c.estado || '-'}
+                                  </span>
+                                </td>
+                                <td>{c.instructor || '-'}</td>
+                                <td>
+                                  {c.link ? (
+                                    <a href={c.link} target="_blank" rel="noopener noreferrer" className="historial-link">
+                                      Ver clase
+                                    </a>
+                                  ) : (
+                                    '-'
+                                  )}
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    ) : (
+                      <p className="historial-empty">No hay clases registradas.</p>
+                    )}
+                  </section>
+                </>
+              )}
             </div>
-            <div className="modal-footer">
-              <button className="btn-secondary" onClick={handleCloseDetails}>Cerrar</button>
-              <button 
+            <div className="modal-footer modal-footer-actions">
+              <button className="btn-secondary" onClick={handleCloseDetails}>
+                Cerrar
+              </button>
+              <button
                 className={`btn-drive ${selectedStudent.driveLink ? '' : 'no-link'}`}
                 onClick={() => {
                   if (selectedStudent.driveLink) {
@@ -1002,10 +1133,10 @@ const GestionAlumnos = ({ userRole, isAuthenticated }) => {
                   }
                 }}
               >
-                📁 {selectedStudent.driveLink ? 'Ver en Drive' : 'Agregar Link Drive'}
+                📁 {selectedStudent.driveLink ? 'Ver Drive' : 'Agregar link Drive'}
               </button>
               <button className="btn-export" onClick={() => handleExportStudent(selectedStudent)}>
-                Exportar a Excel
+                Exportar registro en Excel
               </button>
             </div>
           </div>

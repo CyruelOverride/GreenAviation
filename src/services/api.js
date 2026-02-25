@@ -106,6 +106,10 @@ export const userAPI = {
     return apiRequest(`/api/users/${id}`);
   },
 
+  getHistorial: async (id) => {
+    return apiRequest(`/api/users/${id}/historial`);
+  },
+
   create: async (userData) => {
     return apiRequest('/api/users', {
       method: 'POST',
@@ -302,6 +306,51 @@ export const videoAPI = {
   },
 };
 
+// API de Clases Online
+export const claseOnlineAPI = {
+  getAll: async (filters = {}) => {
+    const queryParams = new URLSearchParams(filters).toString();
+    return apiRequest(`/api/clases-online${queryParams ? `?${queryParams}` : ''}`);
+  },
+
+  getById: async (id) => {
+    return apiRequest(`/api/clases-online/${id}`);
+  },
+
+  create: async (claseData) => {
+    return apiRequest('/api/clases-online', {
+      method: 'POST',
+      body: JSON.stringify(claseData),
+    });
+  },
+
+  update: async (id, claseData) => {
+    return apiRequest(`/api/clases-online/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(claseData),
+    });
+  },
+
+  delete: async (id) => {
+    return apiRequest(`/api/clases-online/${id}`, {
+      method: 'DELETE',
+    });
+  },
+
+  registrarAlumno: async (id, alumnoId = null) => {
+    return apiRequest(`/api/clases-online/${id}/registrar-alumno`, {
+      method: 'POST',
+      body: JSON.stringify(alumnoId ? { alumnoId } : {}),
+    });
+  },
+
+  eliminarAlumno: async (id, alumnoId) => {
+    return apiRequest(`/api/clases-online/${id}/alumnos/${alumnoId}`, {
+      method: 'DELETE',
+    });
+  },
+};
+
 // API de Recursos (para gestión de admin)
 export const recursoAPI = {
   // Obtener todos los recursos
@@ -376,5 +425,6 @@ export default {
   opcionAPI,
   videoAPI,
   recursoAPI,
+  claseOnlineAPI,
 };
 
