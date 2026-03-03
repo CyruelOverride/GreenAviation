@@ -16,8 +16,8 @@ import Login from './pages/Login/Login';
 import { authAPI } from './services/api';
 import './App.css';
 
-// ========== TEMPORAL: Bypass login admin para corroborar el front. BORRAR en producción. ==========
-const BYPASS_ADMIN_LOGIN = true;
+// ========== TEMPORAL: Bypass login admin para desarrollo. Con true, al reabrir la página la sesión se restaura. ==========
+const BYPASS_ADMIN_LOGIN = false;
 // ========== Fin bypass temporal ==========
 
 function App() {
@@ -95,6 +95,7 @@ function App() {
         <Header 
           isAuthenticated={isAuthenticated}
           setIsAuthenticated={setIsAuthenticated}
+          setUserRole={setUserRole}
           userRole={userRole}
           toggleSidebar={toggleSidebar}
           sidebarOpen={sidebarOpen}

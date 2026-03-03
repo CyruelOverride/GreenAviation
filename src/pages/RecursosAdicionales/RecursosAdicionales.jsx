@@ -8,30 +8,7 @@ const RecursosAdicionales = ({ isAuthenticated }) => {
   // Organizar recursos por categorías
   const recursosPorCategoria = {
     manuales: [
-      { 
-        id: 1, 
-        name: 'Manual Piloto Privado 2026 (con Videos)', 
-        type: 'PDF', 
-        size: '25 MB',
-        filePath: '/documentos/MANUAL PILOTO PRIVADO 2026-CON VIDEOS FINAL.pdf',
-        category: 'manuales'
-      },
-      { 
-        id: 2, 
-        name: 'Manual Piloto Privado 2026 (con Videos) - Word', 
-        type: 'DOCX', 
-        size: '30 MB',
-        filePath: '/documentos/MANUAL PILOTO PRIVADO 2026-CON VIDEOS FINAL.docx',
-        category: 'manuales'
-      },
-      { 
-        id: 3, 
-        name: 'P. Privado 2026 con Videos', 
-        type: 'PDF', 
-        size: 'N/A',
-        filePath: '/documentos/P. PRIVADO 2026 CON VIDEOS.pdf',
-        category: 'manuales'
-      },
+      // Manual de Piloto Privado solo en Estudio Teórico (link Drive)
       { 
         id: 4, 
         name: 'Manual C-150 CX-BFF', 

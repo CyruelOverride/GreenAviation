@@ -2,14 +2,15 @@ import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import './Header.css';
 
-const Header = ({ isAuthenticated, setIsAuthenticated, userRole, toggleSidebar, sidebarOpen }) => {
+const Header = ({ isAuthenticated, setIsAuthenticated, setUserRole, userRole, toggleSidebar, sidebarOpen }) => {
   const navigate = useNavigate();
 
   const handleLogout = () => {
-    // Limpiar token y datos del usuario
+    // Limpiar token y datos del usuario para que al reabrir la página no quede sesión
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     setIsAuthenticated(false);
+    if (setUserRole) setUserRole(null);
     navigate('/');
   };
 

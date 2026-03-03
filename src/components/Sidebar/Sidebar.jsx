@@ -62,11 +62,11 @@ const Sidebar = ({ userRole, isAuthenticated, isOpen, onClose }) => {
             {expandedSections.video && (
               <div className="nav-submenu">
                 <Link to="/estudio-teorico" className="nav-subitem" onClick={handleLinkClick}>
-                  <span className="subitem-icon">🔒</span>
+                  <span className="subitem-icon">{isAuthenticated ? '•' : '🔒'}</span>
                   <span>Iniciar Próxima Lección</span>
                 </Link>
                 <Link to="/estudio-teorico" className="nav-subitem" onClick={handleLinkClick}>
-                  <span className="subitem-icon">🔒</span>
+                  <span className="subitem-icon">{isAuthenticated ? '•' : '🔒'}</span>
                   <span>Videos Opcionales</span>
                 </Link>
                 <Link to="/estudio-teorico" className="nav-subitem" onClick={handleLinkClick}>
@@ -94,11 +94,11 @@ const Sidebar = ({ userRole, isAuthenticated, isOpen, onClose }) => {
                   <span>Iniciar nueva sesión de estudio</span>
                 </Link>
                 <Link to="/examenes" className="nav-subitem" onClick={handleLinkClick}>
-                  <span className="subitem-icon">🔒</span>
+                  <span className="subitem-icon">{isAuthenticated ? '•' : '🔒'}</span>
                   <span>Tomar examen de práctica</span>
                 </Link>
                 <Link to="/examenes" className="nav-subitem" onClick={handleLinkClick}>
-                  <span className="subitem-icon">🔒</span>
+                  <span className="subitem-icon">{isAuthenticated ? '•' : '🔒'}</span>
                   <span>Historial de Estudio</span>
                 </Link>
               </div>
@@ -122,7 +122,7 @@ const Sidebar = ({ userRole, isAuthenticated, isOpen, onClose }) => {
                   <span>Plan de Curso (TCO)</span>
                 </Link>
                 <Link to="/examenes" className="nav-subitem" onClick={handleLinkClick}>
-                  <span className="subitem-icon">🔒</span>
+                  <span className="subitem-icon">{isAuthenticated ? '•' : '🔒'}</span>
                   <span>Examen Pre-Solo</span>
                 </Link>
                 <Link to="/recursos-adicionales" className="nav-subitem" onClick={handleLinkClick}>
