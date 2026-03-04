@@ -414,6 +414,9 @@ const GestionRecursos = ({ isAuthenticated, userRole }) => {
                     <option value="general">General</option>
                     <option value="manuales">Manuales</option>
                     <option value="reglamentos">Reglamentos</option>
+                    <option value="aip-gen">AIP - GEN</option>
+                    <option value="aip-ad">AIP - AD</option>
+                    <option value="aip-enr">AIP - ENR</option>
                     <option value="videos">Videos</option>
                     <option value="documentos">Documentos</option>
                   </select>
