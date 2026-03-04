@@ -68,6 +68,11 @@ function App() {
     checkAuth();
   }, []);
 
+  // Título único para SEO (pestaña del navegador)
+  React.useEffect(() => {
+    document.title = 'Green Aviation Campus';
+  }, []);
+
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
   };

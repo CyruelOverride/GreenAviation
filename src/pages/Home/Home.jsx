@@ -167,11 +167,16 @@ const Home = () => {
 
       <section className="info-section">
         <div className="info-content">
-          <h2 className="section-title">Sobre GreenAviation Campus</h2>
+          <h2 className="section-title">Sobre Green Aviation Campus</h2>
           <p className="section-description">
-            GreenAviation Campus es una academia de formación aeronáutica comprometida con la excelencia en la instrucción de pilotos. 
-            Nuestro campus virtual ofrece una experiencia de aprendizaje completa que combina teoría, práctica y tecnología 
-            para formar pilotos competentes y seguros.
+            Green Aviation Campus es una academia de formación aeronáutica comprometida con la excelencia en la instrucción de pilotos. 
+            Si querés estudiar aviación en Salto o en Uruguay, nuestro campus virtual ofrece una experiencia de aprendizaje completa: 
+            curso de piloto privado con teoría, exámenes, clases online y preparación para la Dinacia. Formamos pilotos en aviones 
+            con instructores dedicados y material actualizado.
+          </p>
+          <p className="section-description">
+            Ideal para quienes buscan aviación Salto, curso de piloto privado o licencia de piloto: clases de aviación, 
+            instrucción de vuelo y recursos para rendir con confianza.
           </p>
           <div className="social-links">
             <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="social-icon" aria-label="Facebook">
