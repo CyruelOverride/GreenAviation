@@ -45,25 +45,19 @@ const videosDelCurso = [
   { numero: 38, titulo: 'Luces de pista', driveLink: 'https://drive.google.com/file/d/1v_a9rSB0TUwJxEoUN5VpS7HE-a8NhuZm/view?usp=drive_link' },
 ];
 
-// Mapeo de videos a capítulos (cada capítulo puede tener múltiples videos)
-// El video 1 siempre está desbloqueado
-// Para ver el video N (N>1), el usuario debe haber aprobado el examen del capítulo correspondiente al video N-1
-const getCapituloParaVideo = (videoNumero) => {
-  // Video 1 no requiere examen previo
-  if (videoNumero === 1) return null;
-  // Para los demás videos, se requiere aprobar el examen del capítulo anterior
-  // Simplificamos: cada 3 videos corresponden a un capítulo
-  return Math.ceil((videoNumero - 1) / 3);
-};
+// Los videos se desbloquean en orden: el video 1 siempre está disponible;
+// para ver el video N (N>1) debes haber completado el video N-1.
+// Así se evita la dependencia circular con los exámenes (el examen del capítulo
+// requiere ver los 3 videos del capítulo; los videos no requieren aprobar exámenes).
 
 const EstudioTeorico = ({ isAuthenticated, userRole }) => {
-  const [progress, setProgress] = useState(userRole === 'admin' ? 100 : 35);
+  const [progress, setProgress] = useState(0);
   const [videosVistos, setVideosVistos] = useState({});
   const [examenesPorCapitulo, setExamenesPorCapitulo] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Cargar progreso de videos y exámenes
+  // Cargar progreso de videos, exámenes y porcentaje de avance
   useEffect(() => {
     const fetchProgress = async () => {
       if (!isAuthenticated) {
@@ -76,6 +70,9 @@ const EstudioTeorico = ({ isAuthenticated, userRole }) => {
         if (response.success) {
           setVideosVistos(response.data.videosVistos || {});
           setExamenesPorCapitulo(response.data.examenesPorCapitulo || {});
+          // Progreso real del alumno (basado en exámenes aprobados), admin siempre 100%
+          const progresoReal = userRole === 'admin' ? 100 : (response.data.progreso ?? 0);
+          setProgress(progresoReal);
         }
       } catch (err) {
         console.error('Error al cargar progreso:', err);
@@ -86,65 +83,22 @@ const EstudioTeorico = ({ isAuthenticated, userRole }) => {
     };
 
     fetchProgress();
-  }, [isAuthenticated]);
+  }, [isAuthenticated, userRole]);
 
-  // Actualizar progreso cuando cambie el userRole
-  useEffect(() => {
-    if (userRole === 'admin') {
-      setProgress(100);
-    } else {
-      const savedProgress = localStorage.getItem('userProgress');
-      if (savedProgress) {
-        setProgress(parseInt(savedProgress));
-      }
-    }
-  }, [userRole]);
-
-  // Verificar si un video está desbloqueado
+  // Verificar si un video está desbloqueado: solo se requiere haber completado el video anterior
   const isVideoDesbloqueado = (videoNumero) => {
-    // Admin tiene acceso a todo
     if (userRole === 'admin') return true;
-    
-    // Video 1 siempre está desbloqueado
     if (videoNumero === 1) return true;
-
-    // Para los demás videos, verificar que el video anterior haya sido visto
-    // Y que el examen del capítulo correspondiente esté aprobado (>= 90%)
     const videoAnterior = videoNumero - 1;
-    
-    // Verificar si vio el video anterior
-    const vioVideoAnterior = videosVistos[videoAnterior]?.completado;
-    
-    // Obtener el capítulo que corresponde al video anterior
-    const capituloRequerido = getCapituloParaVideo(videoNumero);
-    
-    if (capituloRequerido === null) return true;
-    
-    // Verificar si aprobó el examen del capítulo
-    const examenCapitulo = examenesPorCapitulo[capituloRequerido];
-    const aproboExamen = examenCapitulo && examenCapitulo.puntaje >= 90;
-    
-    return aproboExamen;
+    return videosVistos[videoAnterior]?.completado === true;
   };
 
-  // Obtener mensaje de bloqueo para un video
+  // Mensaje cuando el video está bloqueado
   const getMensajeBloqueo = (videoNumero) => {
     if (videoNumero === 1) return null;
-    
-    const capituloRequerido = getCapituloParaVideo(videoNumero);
-    if (capituloRequerido === null) return null;
-    
-    const examenCapitulo = examenesPorCapitulo[capituloRequerido];
-    
-    if (!examenCapitulo) {
-      return `Completa el examen del capítulo ${capituloRequerido} para desbloquear`;
-    }
-    
-    if (examenCapitulo.puntaje < 90) {
-      return `Necesitas 90% en el examen del capítulo ${capituloRequerido} (actual: ${examenCapitulo.puntaje}%)`;
-    }
-    
-    return null;
+    const videoAnterior = videoNumero - 1;
+    if (videosVistos[videoAnterior]?.completado) return null;
+    return `Completa el video ${videoAnterior} para desbloquear este video`;
   };
 
   // Manejar clic en ver video
@@ -239,7 +193,7 @@ const EstudioTeorico = ({ isAuthenticated, userRole }) => {
         <div className="videos-curso-section">
           <h2>📹 Videos del Curso Teórico</h2>
           <p className="videos-descripcion">
-            Completa cada video para avanzar en el curso. Los videos se desbloquean al aprobar los exámenes de capítulos anteriores con un mínimo del 90%.
+            Completa cada video en orden para avanzar. Cada video se desbloquea al completar el anterior. Luego de ver los tres videos de un capítulo, podrás realizar el examen de ese capítulo en la sección Exámenes.
           </p>
           
           {loading ? (
