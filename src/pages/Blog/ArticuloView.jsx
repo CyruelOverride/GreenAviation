@@ -1,14 +1,37 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { articuloAPI } from '../../services/api';
 import './Blog.css';
+
+function getYoutubeEmbedUrl(url) {
+  if (!url || typeof url !== 'string') return null;
+  const m = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+  return m ? `https://www.youtube.com/embed/${m[1]}` : null;
+}
 
 const ArticuloView = ({ userRole }) => {
   const { slug } = useParams();
   const [articulo, setArticulo] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [carouselIndex, setCarouselIndex] = useState(0);
   const isAdmin = userRole === 'admin';
+
+  const carouselSlides = useMemo(() => {
+    if (!articulo) return [];
+    const slides = [];
+    if (articulo.imagenPortadaUrl) {
+      slides.push({ type: 'portada', url: articulo.imagenPortadaUrl, nombre: 'Portada' });
+    }
+    (articulo.recursos || []).forEach((r) => {
+      if (r.tipo === 'link_video') {
+        slides.push({ type: 'video', url: r.rutaOUrl, nombre: r.nombre });
+      } else if (r.tipo === 'archivo' || r.tipo === 'link_externo') {
+        slides.push({ type: 'image', url: r.rutaOUrl, nombre: r.nombre });
+      }
+    });
+    return slides;
+  }, [articulo]);
 
   useEffect(() => {
     if (!slug) return;
@@ -81,7 +104,69 @@ const ArticuloView = ({ userRole }) => {
           </div>
         </header>
 
-        {articulo.imagenPortadaUrl && (
+        {carouselSlides.length > 0 && (
+          <div className="articulo-carousel">
+            <div className="articulo-carousel-inner">
+              {carouselSlides.map((slide, i) => (
+                <div
+                  key={i}
+                  className={`articulo-carousel-slide ${i === carouselIndex ? 'active' : ''}`}
+                  role="tabpanel"
+                  aria-hidden={i !== carouselIndex}
+                >
+                  {slide.type === 'video' && getYoutubeEmbedUrl(slide.url) ? (
+                    <div className="carousel-video-wrapper">
+                      <iframe
+                        title={slide.nombre || 'Video'}
+                        src={getYoutubeEmbedUrl(slide.url)}
+                        frameBorder="0"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowFullScreen
+                      />
+                    </div>
+                  ) : (slide.type === 'portada' || slide.type === 'image') && slide.url ? (
+                    <div className="carousel-image-wrapper">
+                      <img src={slide.url} alt={slide.nombre || ''} />
+                    </div>
+                  ) : null}
+                </div>
+              ))}
+            </div>
+            {carouselSlides.length > 1 && (
+              <>
+                <button
+                  type="button"
+                  className="carousel-btn carousel-prev"
+                  onClick={() => setCarouselIndex((prev) => (prev === 0 ? carouselSlides.length - 1 : prev - 1))}
+                  aria-label="Anterior"
+                >
+                  ‹
+                </button>
+                <button
+                  type="button"
+                  className="carousel-btn carousel-next"
+                  onClick={() => setCarouselIndex((prev) => (prev === carouselSlides.length - 1 ? 0 : prev + 1))}
+                  aria-label="Siguiente"
+                >
+                  ›
+                </button>
+                <div className="carousel-dots">
+                  {carouselSlides.map((_, i) => (
+                    <button
+                      key={i}
+                      type="button"
+                      className={`carousel-dot ${i === carouselIndex ? 'active' : ''}`}
+                      onClick={() => setCarouselIndex(i)}
+                      aria-label={`Ir a slide ${i + 1}`}
+                    />
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
+        )}
+
+        {carouselSlides.length === 0 && articulo.imagenPortadaUrl && (
           <div className="articulo-full-image">
             <img src={articulo.imagenPortadaUrl} alt="" />
           </div>
