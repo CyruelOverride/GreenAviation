@@ -416,49 +416,6 @@ export const recursoAPI = {
   },
 };
 
-// API de Artículos (Blog) - listado y por slug pueden llamarse sin token (público)
-export const articuloAPI = {
-  list: async (params = {}) => {
-    const query = new URLSearchParams(params).toString();
-    return apiRequest(`/api/articulos${query ? `?${query}` : ''}`);
-  },
-  getBySlug: async (slug) => {
-    return apiRequest(`/api/articulos/slug/${encodeURIComponent(slug)}`);
-  },
-  getById: async (id) => {
-    return apiRequest(`/api/articulos/${id}`);
-  },
-  create: async (data) => {
-    return apiRequest('/api/articulos', {
-      method: 'POST',
-      body: JSON.stringify(data),
-    });
-  },
-  update: async (id, data) => {
-    return apiRequest(`/api/articulos/${id}`, {
-      method: 'PUT',
-      body: JSON.stringify(data),
-    });
-  },
-  delete: async (id) => {
-    return apiRequest(`/api/articulos/${id}`, { method: 'DELETE' });
-  },
-  getRecursos: async (articuloId) => {
-    return apiRequest(`/api/articulos/${articuloId}/recursos`);
-  },
-  addRecursos: async (articuloId, recursoIds, orden) => {
-    return apiRequest(`/api/articulos/${articuloId}/recursos`, {
-      method: 'POST',
-      body: JSON.stringify({ recursoIds, orden }),
-    });
-  },
-  removeRecurso: async (articuloId, recursoId) => {
-    return apiRequest(`/api/articulos/${articuloId}/recursos/${recursoId}`, {
-      method: 'DELETE',
-    });
-  },
-};
-
 export default {
   authAPI,
   userAPI,
@@ -468,7 +425,6 @@ export default {
   opcionAPI,
   videoAPI,
   recursoAPI,
-  articuloAPI,
   claseOnlineAPI,
 };
 

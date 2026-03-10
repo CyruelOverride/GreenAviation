@@ -12,9 +12,6 @@ import GestionRecursos from './pages/GestionRecursos/GestionRecursos';
 import MiPerfil from './pages/MiPerfil/MiPerfil';
 import RecursosAdicionales from './pages/RecursosAdicionales/RecursosAdicionales';
 import ClasesOnline from './pages/ClasesOnline/ClasesOnline';
-import Blog from './pages/Blog/Blog';
-import ArticuloView from './pages/Blog/ArticuloView';
-import BlogForm from './pages/Blog/BlogForm';
 import Login from './pages/Login/Login';
 import { authAPI } from './services/api';
 import './App.css';
@@ -162,22 +159,6 @@ function App() {
               <Route 
                 path="/clases-online" 
                 element={<ClasesOnline isAuthenticated={isAuthenticated} userRole={userRole} />}
-              />
-              <Route 
-                path="/blog" 
-                element={<Blog isAuthenticated={isAuthenticated} userRole={userRole} />}
-              />
-              <Route 
-                path="/blog/articulo/:slug" 
-                element={<ArticuloView userRole={userRole} />}
-              />
-              <Route 
-                path="/blog/nuevo" 
-                element={<BlogForm userRole={userRole} />}
-              />
-              <Route 
-                path="/blog/editar/:id" 
-                element={<BlogForm userRole={userRole} />}
               />
             </Routes>
           </main>

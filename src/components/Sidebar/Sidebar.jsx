@@ -67,7 +67,7 @@ const Sidebar = ({ userRole, isAuthenticated, isOpen, onClose }) => {
                 </Link>
                 <Link to="/estudio-teorico" className="nav-subitem" onClick={handleLinkClick}>
                   <span className="subitem-icon">{isAuthenticated ? '•' : '🔒'}</span>
-                  <span>Videos Opcionales</span>
+                  <span>Videos Teoricos del Curso</span>
                 </Link>
                 <Link to="/estudio-teorico" className="nav-subitem" onClick={handleLinkClick}>
                   <span className="subitem-icon">•</span>

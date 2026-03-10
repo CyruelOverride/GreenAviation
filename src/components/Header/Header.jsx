@@ -38,7 +38,6 @@ const Header = ({ isAuthenticated, setIsAuthenticated, setUserRole, userRole, to
         <Link to="/estudio-teorico" className="nav-link">Mi Curso</Link>
         <Link to="/examenes" className="nav-link">Exámenes</Link>
         <Link to="/clases-online" className="nav-link">Clases Online</Link>
-        <Link to="/blog" className="nav-link">Blog</Link>
       </nav>
       <div className="header-right">
         {isAuthenticated ? (

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { videoAPI } from '../../services/api';
 import './EstudioTeorico.css';
@@ -56,8 +56,9 @@ const EstudioTeorico = ({ isAuthenticated, userRole }) => {
   const [examenesPorCapitulo, setExamenesPorCapitulo] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const pollingIntervalRef = useRef(null);
 
-  // Cargar progreso de videos, exámenes y porcentaje de avance
+  // Cargar progreso de videos, exámenes y porcentaje de avance (primer fetch)
   useEffect(() => {
     const fetchProgress = async () => {
       if (!isAuthenticated) {
@@ -84,6 +85,52 @@ const EstudioTeorico = ({ isAuthenticated, userRole }) => {
 
     fetchProgress();
   }, [isAuthenticated, userRole]);
+
+  // Polling periódico de progreso mientras haya videos "En progreso"
+  useEffect(() => {
+    if (!isAuthenticated || userRole === 'admin') {
+      if (pollingIntervalRef.current) {
+        clearInterval(pollingIntervalRef.current);
+        pollingIntervalRef.current = null;
+      }
+      return;
+    }
+
+    const hayEnProgreso = Object.values(videosVistos).some(
+      (v) => v && v.completado === false
+    );
+
+    if (!hayEnProgreso) {
+      if (pollingIntervalRef.current) {
+        clearInterval(pollingIntervalRef.current);
+        pollingIntervalRef.current = null;
+      }
+      return;
+    }
+
+    if (!pollingIntervalRef.current) {
+      pollingIntervalRef.current = setInterval(async () => {
+        try {
+          const response = await videoAPI.getProgress();
+          if (response.success) {
+            setVideosVistos(response.data.videosVistos || {});
+            setExamenesPorCapitulo(response.data.examenesPorCapitulo || {});
+            const progresoReal = userRole === 'admin' ? 100 : (response.data.progreso ?? 0);
+            setProgress(progresoReal);
+          }
+        } catch (err) {
+          console.error('Error al actualizar progreso (polling):', err);
+        }
+      }, 4 * 60 * 1000); // cada 4 minutos
+    }
+
+    return () => {
+      if (pollingIntervalRef.current) {
+        clearInterval(pollingIntervalRef.current);
+        pollingIntervalRef.current = null;
+      }
+    };
+  }, [isAuthenticated, userRole, videosVistos]);
 
   // Verificar si un video está desbloqueado: solo se requiere haber completado el video anterior
   const isVideoDesbloqueado = (videoNumero) => {
