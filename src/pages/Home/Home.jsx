@@ -232,14 +232,14 @@ const Home = () => {
           </p>
           <div className="video-wrapper">
             <div className="video-card-featured">
-              <div className="video-thumbnail">
-                <img 
-                  src="https://via.placeholder.com/800x450/22c55e/ffffff?text=Video+Referencial+GreenAviation" 
-                  alt="Video referencial"
-                />
-                <div className="play-overlay">
-                  <span className="play-icon">▶</span>
-                </div>
+              <div className="video-player">
+                <video
+                  className="video-element"
+                  controls
+                >
+                  <source src="/VideosPromocionales/WhatsApp Video 2026-03-12 at 18.13.38.mp4" type="video/mp4" />
+                  Tu navegador no soporta el elemento de video.
+                </video>
               </div>
               <div className="video-info">
                 <h3>Introducción a GreenAviation Campus</h3>
