@@ -174,8 +174,6 @@ const GestionAlumnos = ({ userRole, isAuthenticated }) => {
       // Preparar datos para enviar
       const dataToSend = {
         ...createFormData,
-        // Solo enviar entrenamientoPrevio si tieneEntrenamientoPrevio es true
-        entrenamientoPrevio: createFormData.tieneEntrenamientoPrevio ? createFormData.entrenamientoPrevio : null,
         // Limpiar valores vacíos de entrenamientoPrevio
         entrenamientoPrevio: createFormData.tieneEntrenamientoPrevio ? Object.fromEntries(
           Object.entries(createFormData.entrenamientoPrevio).map(([key, value]) => [

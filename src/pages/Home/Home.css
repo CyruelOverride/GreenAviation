@@ -1029,3 +1029,21 @@
   line-height: 1.6;
 }
 
+.video-player {
+  width: 100%;
+  background-color: #000;
+}
+
+.video-element {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+@media (max-width: 768px) {
+  .video-element {
+    width: 100%;
+    height: auto;
+  }
+}
+
