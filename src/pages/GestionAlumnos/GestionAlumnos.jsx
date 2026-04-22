@@ -122,6 +122,34 @@ const GestionAlumnos = ({ userRole, isAuthenticated }) => {
     }
   };
 
+  const handleDeleteStudent = async (student) => {
+    const studentId = student.id || student._id;
+    const studentName = `${student.nombre || ''} ${student.apellido || ''}`.trim() || 'este alumno';
+
+    if (!studentId) {
+      alert('Error: No se pudo identificar el ID del alumno');
+      return;
+    }
+
+    const confirmed = window.confirm(`¿Seguro que deseas eliminar a ${studentName}? Esta acción no se puede deshacer.`);
+    if (!confirmed) return;
+
+    try {
+      const response = await userAPI.delete(studentId);
+      if (response.success) {
+        alert('Alumno eliminado exitosamente');
+        setStudents(prev => prev.filter(s => (s.id || s._id) !== studentId));
+
+        if (selectedStudent && (selectedStudent.id || selectedStudent._id) === studentId) {
+          handleCloseDetails();
+        }
+      }
+    } catch (err) {
+      alert(err.message || 'Error al eliminar el alumno');
+      console.error('Error deleting student:', err);
+    }
+  };
+
   // Abrir link de Drive del alumno
   const handleOpenDrive = (student) => {
     if (student.driveLink) {
@@ -411,6 +439,12 @@ const GestionAlumnos = ({ userRole, isAuthenticated }) => {
                           onClick={() => handleExportStudent(student)}
                         >
                           Exportar
+                        </button>
+                        <button
+                          className="btn-delete"
+                          onClick={() => handleDeleteStudent(student)}
+                        >
+                          Eliminar
                         </button>
                         <div className="drive-button-container">
                           <button 
@@ -1135,6 +1169,9 @@ const GestionAlumnos = ({ userRole, isAuthenticated }) => {
               </button>
               <button className="btn-export" onClick={() => handleExportStudent(selectedStudent)}>
                 Exportar registro en Excel
+              </button>
+              <button className="btn-delete" onClick={() => handleDeleteStudent(selectedStudent)}>
+                Eliminar alumno
               </button>
             </div>
           </div>

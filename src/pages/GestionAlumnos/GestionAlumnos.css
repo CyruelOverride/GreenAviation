@@ -86,6 +86,21 @@
   background-color: #2563eb;
 }
 
+.btn-delete {
+  padding: 8px 16px;
+  background-color: #dc2626;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.btn-delete:hover {
+  background-color: #b91c1c;
+}
+
 .student-modal {
   position: fixed;
   top: 0;
