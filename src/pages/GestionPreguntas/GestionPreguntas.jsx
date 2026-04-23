@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { preguntaAPI, opcionAPI, examenAPI, capituloAPI } from '../../services/api';
 import './GestionPreguntas.css';
 
@@ -6,6 +6,9 @@ const GestionPreguntas = ({ isAuthenticated, userRole }) => {
   const [capitulos, setCapitulos] = useState([]);
   const [capituloSeleccionadoId, setCapituloSeleccionadoId] = useState('');
   const [preguntas, setPreguntas] = useState([]);
+  const [busqueda, setBusqueda] = useState('');
+  const [politicasExpandida, setPoliticasExpandida] = useState(false);
+  const [nuevoCapExpandida, setNuevoCapExpandida] = useState(false);
   const [loading, setLoading] = useState(false);
   const [loadingCapitulos, setLoadingCapitulos] = useState(false);
   const [error, setError] = useState(null);
@@ -327,6 +330,21 @@ const GestionPreguntas = ({ isAuthenticated, userRole }) => {
 
   const capituloActivo = capitulos.find((c) => String(c.id) === String(capituloSeleccionadoId));
 
+  const preguntasFiltradas = useMemo(() => {
+    const q = busqueda.trim().toLowerCase();
+    if (!q) return preguntas;
+    return preguntas.filter(
+      (p) =>
+        (p.enunciado || '').toLowerCase().includes(q) ||
+        String(p.id).includes(q)
+    );
+  }, [preguntas, busqueda]);
+
+  const totalActivas = useMemo(
+    () => preguntas.filter((p) => p.activa).length,
+    [preguntas]
+  );
+
   if (!isAuthenticated || userRole !== 'admin') {
     return (
       <div className="gestion-preguntas">
@@ -340,141 +358,256 @@ const GestionPreguntas = ({ isAuthenticated, userRole }) => {
 
   return (
     <div className="gestion-preguntas">
-      <h1 className="page-title">Gestión de Preguntas</h1>
+      <header className="gp-page-header">
+        <h1 className="page-title">Gestión de preguntas</h1>
+        <p className="gp-lead">
+          Elegí un capítulo o examen, revisá la política de acceso y sumá o editá preguntas del banco.
+        </p>
+      </header>
 
-      <div className="filters-section">
-        <label htmlFor="capitulo-select">Capítulo / examen:</label>
-        <select
-          id="capitulo-select"
-          value={capituloSeleccionadoId}
-          onChange={(e) => setCapituloSeleccionadoId(e.target.value)}
-          className="capitulo-select"
-          disabled={loadingCapitulos || capitulos.length === 0}
+      <section className="gp-toolbar" aria-label="Capítulo y búsqueda">
+        <div className="gp-toolbar-row gp-toolbar-row--main">
+          <div className="gp-field gp-field--grow">
+            <label htmlFor="capitulo-select" className="gp-field-label">
+              Capítulo / examen activo
+            </label>
+            <select
+              id="capitulo-select"
+              value={capituloSeleccionadoId}
+              onChange={(e) => setCapituloSeleccionadoId(e.target.value)}
+              className="capitulo-select gp-select"
+              disabled={loadingCapitulos || capitulos.length === 0}
+            >
+              {capitulos.length === 0 ? (
+                <option value="">No hay capítulos</option>
+              ) : (
+                capitulos.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.nombre}
+                    {c.numeroCurso != null ? ` · tema curso ${c.numeroCurso}` : ''}
+                  </option>
+                ))
+              )}
+            </select>
+          </div>
+          <div className="gp-toolbar-actions">
+            <button
+              type="button"
+              className="btn-secondary gp-btn-icon"
+              onClick={() => {
+                loadCapitulos();
+                loadPreguntas();
+              }}
+              disabled={loading || loadingCapitulos}
+              title="Recargar capítulos y preguntas"
+            >
+              {loading || loadingCapitulos ? '…' : '↻ Actualizar'}
+            </button>
+          </div>
+        </div>
+        <div className="gp-toolbar-row gp-toolbar-row--meta">
+          <div className="gp-stat-chips" role="status">
+            <span className="gp-chip">
+              <strong>{preguntas.length}</strong> preguntas
+            </span>
+            <span className="gp-chip gp-chip--success">
+              <strong>{totalActivas}</strong> activas
+            </span>
+            {busqueda.trim() && (
+              <span className="gp-chip gp-chip--muted">
+                Mostrando <strong>{preguntasFiltradas.length}</strong> de {preguntas.length}
+              </span>
+            )}
+          </div>
+          <div className="gp-field gp-field--search">
+            <label htmlFor="gp-busqueda" className="gp-sr-only">
+              Buscar en enunciados
+            </label>
+            <input
+              id="gp-busqueda"
+              type="search"
+              className="gp-input-search"
+              placeholder="Buscar por texto o ID de pregunta…"
+              value={busqueda}
+              onChange={(e) => setBusqueda(e.target.value)}
+              autoComplete="off"
+            />
+            {busqueda && (
+              <button
+                type="button"
+                className="gp-search-clear"
+                onClick={() => setBusqueda('')}
+                aria-label="Limpiar búsqueda"
+              >
+                ×
+              </button>
+            )}
+          </div>
+        </div>
+      </section>
+
+      <div className="gp-context-card" role="region" aria-label="Contexto del capítulo seleccionado">
+        <div className="gp-context-card__accent" aria-hidden />
+        <div className="gp-context-card__body">
+          <span className="gp-context-card__label">Estás trabajando en</span>
+          <p className="gp-context-card__title">
+            {capituloActivo ? capituloActivo.nombre : 'Seleccioná un capítulo'}
+          </p>
+          <ul className="gp-context-card__meta">
+            {capituloActivo?.numeroCurso != null && (
+              <li>Tema del curso: <strong>{capituloActivo.numeroCurso}</strong></li>
+            )}
+            {capituloActivo && (
+              <li>
+                Hasta <strong>{capituloActivo.maxPreguntas}</strong> preguntas por examen aleatorio
+              </li>
+            )}
+            {capituloActivo && (
+              <li>
+                Examen para alumnos:{' '}
+                <strong>{capituloActivo.habilitado ? 'Habilitado' : 'Bloqueado'}</strong>
+              </li>
+            )}
+          </ul>
+        </div>
+      </div>
+
+      <div className="gp-collapsible">
+        <button
+          type="button"
+          className="gp-collapsible__trigger"
+          onClick={() => setNuevoCapExpandida((v) => !v)}
+          aria-expanded={nuevoCapExpandida}
         >
-          {capitulos.map((c) => (
-            <option key={c.id} value={c.id}>
-              {c.nombre}
-              {c.numeroCurso != null ? ` (tema curso ${c.numeroCurso})` : ''}
-            </option>
-          ))}
-        </select>
-        <button className="btn-secondary" onClick={() => { loadCapitulos(); loadPreguntas(); }} disabled={loading}>
-          {loading ? 'Cargando...' : 'Recargar'}
+          <span className="gp-collapsible__title">Nuevo capítulo de examen</span>
+          <span className="gp-collapsible__hint">Nombre propio y reglas del intento</span>
+          <span className="gp-collapsible__chevron" aria-hidden>
+            {nuevoCapExpandida ? '▼' : '▶'}
+          </span>
         </button>
-      </div>
-
-      <div className="create-capitulo-section" style={{ marginBottom: '1.5rem' }}>
-        <h2>Crear capítulo de examen</h2>
-        <p className="exam-access-description">
-          Nuevo banco de preguntas con nombre propio. Opcional: número de tema del curso (1–13) para vídeos y progreso.
-        </p>
-        {createCapError && <div className="error-message">{createCapError}</div>}
-        <form onSubmit={handleCreateCapitulo} className="create-question-form" style={{ maxWidth: 520 }}>
-          <label className="form-label">
-            Nombre
-            <input
-              type="text"
-              value={nuevoCapitulo.nombre}
-              onChange={(e) => setNuevoCapitulo((p) => ({ ...p, nombre: e.target.value }))}
-              className="edit-textarea"
-              style={{ minHeight: '2rem' }}
-              placeholder="Ej. Examen prueba Dinacia"
-            />
-          </label>
-          <label className="form-label">
-            Nº tema del curso (opcional, 1–13)
-            <input
-              type="number"
-              min={1}
-              max={13}
-              value={nuevoCapitulo.numeroCurso}
-              onChange={(e) => setNuevoCapitulo((p) => ({ ...p, numeroCurso: e.target.value }))}
-              placeholder="Vacío = solo nombre"
-            />
-          </label>
-          <label className="form-label">
-            Máx. preguntas en examen aleatorio
-            <input
-              type="number"
-              min={1}
-              max={100}
-              value={nuevoCapitulo.maxPreguntas}
-              onChange={(e) => setNuevoCapitulo((p) => ({ ...p, maxPreguntas: e.target.value }))}
-            />
-          </label>
-          <button type="submit" className="btn-primary" disabled={creatingCapitulo}>
-            {creatingCapitulo ? 'Creando...' : 'Crear capítulo'}
-          </button>
-        </form>
-      </div>
-
-      <div className="exam-access-section">
-        <h2>Habilitación y máximo de preguntas por examen</h2>
-        <p className="exam-access-description">
-          Define si los alumnos pueden rendir cada examen y cuántas preguntas aleatorias incluye cada intento (máximo 100).
-        </p>
-        {habilitacionesError && <div className="error-message">{habilitacionesError}</div>}
-        {loadingCapitulos ? (
-          <div className="loading-message">Cargando capítulos...</div>
-        ) : (
-          <div className="exam-access-grid">
-            {capitulos.map((c) => {
-              const habilitado = c.habilitado === true;
-              const bloqueado = savingHabilitacion === c.id;
-              const guardandoMax = savingMaxPreguntas === c.id;
-
-              return (
-                <div key={`habilitacion-${c.id}`} className="exam-access-item">
-                  <span className="exam-access-title">{c.nombre}</span>
-                  {c.numeroCurso != null && (
-                    <span className="exam-access-sub">Tema curso: {c.numeroCurso}</span>
-                  )}
-                  <label className="form-label" style={{ marginTop: '0.5rem' }}>
-                    Máx. preguntas
-                    <input
-                      type="number"
-                      min={1}
-                      max={100}
-                      defaultValue={c.maxPreguntas}
-                      key={`max-${c.id}-${c.maxPreguntas}`}
-                      disabled={guardandoMax}
-                      onBlur={(e) => handleMaxPreguntasBlur(c.id, e.target.value)}
-                    />
-                  </label>
-                  {guardandoMax && <span className="loading-inline">Guardando...</span>}
-                  <button
-                    type="button"
-                    className={`toggle-btn ${habilitado ? 'enabled' : 'disabled'}`}
-                    onClick={() => handleToggleHabilitacion(c.id, !habilitado)}
-                    disabled={bloqueado}
-                  >
-                    {bloqueado ? 'Guardando...' : habilitado ? 'Habilitado' : 'Bloqueado'}
-                  </button>
-                </div>
-              );
-            })}
+        {nuevoCapExpandida && (
+          <div className="gp-collapsible__panel create-capitulo-section">
+            <p className="exam-access-description">
+              Creá un banco nuevo de preguntas. El número de tema del curso (1–13) es opcional: sirve para
+              desbloqueo por vídeos y el progreso del alumno.
+            </p>
+            {createCapError && <div className="error-message">{createCapError}</div>}
+            <form onSubmit={handleCreateCapitulo} className="create-question-form gp-form-narrow">
+              <label className="form-label">
+                Nombre del examen / capítulo
+                <input
+                  type="text"
+                  value={nuevoCapitulo.nombre}
+                  onChange={(e) => setNuevoCapitulo((p) => ({ ...p, nombre: e.target.value }))}
+                  className="gp-input-text"
+                  placeholder="Ej. Examen prueba Dinacia"
+                />
+              </label>
+              <div className="gp-form-row">
+                <label className="form-label">
+                  N.º tema curso (opcional)
+                  <input
+                    type="number"
+                    min={1}
+                    max={13}
+                    value={nuevoCapitulo.numeroCurso}
+                    onChange={(e) => setNuevoCapitulo((p) => ({ ...p, numeroCurso: e.target.value }))}
+                    placeholder="1–13"
+                    className="gp-input-text"
+                  />
+                </label>
+                <label className="form-label">
+                  Máx. preguntas en examen
+                  <input
+                    type="number"
+                    min={1}
+                    max={100}
+                    value={nuevoCapitulo.maxPreguntas}
+                    onChange={(e) => setNuevoCapitulo((p) => ({ ...p, maxPreguntas: e.target.value }))}
+                    className="gp-input-text"
+                  />
+                </label>
+              </div>
+              <button type="submit" className="btn-primary" disabled={creatingCapitulo}>
+                {creatingCapitulo ? 'Creando…' : 'Crear capítulo'}
+              </button>
+            </form>
           </div>
         )}
       </div>
 
-      <div className="create-question-section">
-        <div className="context-banner" style={{
-          padding: '12px 16px',
-          marginBottom: '1rem',
-          background: 'var(--card-bg, #f0f4f8)',
-          borderRadius: 8,
-          borderLeft: '4px solid #2563eb'
-        }}>
-          <strong>Creando preguntas para:</strong>{' '}
-          {capituloActivo ? capituloActivo.nombre : '…'}
-          {capituloActivo?.numeroCurso != null && (
-            <span> — Tema del curso: {capituloActivo.numeroCurso}</span>
-          )}
-          {capituloActivo && (
-            <span> — Hasta {capituloActivo.maxPreguntas} preguntas por examen aleatorio</span>
-          )}
-        </div>
-        <h2>Crear nueva pregunta</h2>
+      <div className="gp-collapsible gp-collapsible--spaced">
+        <button
+          type="button"
+          className="gp-collapsible__trigger"
+          onClick={() => setPoliticasExpandida((v) => !v)}
+          aria-expanded={politicasExpandida}
+        >
+          <span className="gp-collapsible__title">Política de exámenes por capítulo</span>
+          <span className="gp-collapsible__hint">Habilitación y máximo de preguntas por intento</span>
+          <span className="gp-collapsible__chevron" aria-hidden>
+            {politicasExpandida ? '▼' : '▶'}
+          </span>
+        </button>
+        {politicasExpandida && (
+          <div className="gp-collapsible__panel exam-access-section">
+            <p className="exam-access-description">
+              Definí si los alumnos pueden rendir cada examen y cuántas preguntas aleatorias incluye cada intento (1–100).
+              Al salir del campo «Máx. preguntas» se guarda automáticamente.
+            </p>
+            {habilitacionesError && <div className="error-message">{habilitacionesError}</div>}
+            {loadingCapitulos ? (
+              <div className="loading-message">Cargando capítulos…</div>
+            ) : (
+              <div className="exam-access-grid">
+                {capitulos.map((c) => {
+                  const habilitado = c.habilitado === true;
+                  const bloqueado = savingHabilitacion === c.id;
+                  const guardandoMax = savingMaxPreguntas === c.id;
+
+                  return (
+                    <div key={`habilitacion-${c.id}`} className="exam-access-item">
+                      <div className="exam-access-item__head">
+                        <span className="exam-access-title">{c.nombre}</span>
+                        {c.numeroCurso != null && (
+                          <span className="exam-access-badge">Tema {c.numeroCurso}</span>
+                        )}
+                      </div>
+                      <div className="exam-access-item__controls">
+                        <label className="gp-mini-label">
+                          Máx. preguntas
+                          <input
+                            type="number"
+                            min={1}
+                            max={100}
+                            className="gp-input-number"
+                            defaultValue={c.maxPreguntas}
+                            key={`max-${c.id}-${c.maxPreguntas}`}
+                            disabled={guardandoMax}
+                            onBlur={(e) => handleMaxPreguntasBlur(c.id, e.target.value)}
+                          />
+                        </label>
+                        {guardandoMax && <span className="gp-saving">Guardando…</span>}
+                        <button
+                          type="button"
+                          className={`toggle-btn ${habilitado ? 'enabled' : 'disabled'}`}
+                          onClick={() => handleToggleHabilitacion(c.id, !habilitado)}
+                          disabled={bloqueado}
+                        >
+                          {bloqueado ? '…' : habilitado ? 'Habilitado' : 'Bloqueado'}
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+
+      <div className="create-question-section gp-create-section">
+        <h2 className="gp-section-heading">Nueva pregunta en este capítulo</h2>
         {createError && <div className="error-message">{createError}</div>}
         <form onSubmit={handleCreatePregunta} className="create-question-form">
           <label className="form-label">
@@ -548,20 +681,49 @@ const GestionPreguntas = ({ isAuthenticated, userRole }) => {
 
       {error && <div className="error-message">{error}</div>}
 
+      <section className="gp-list-section" aria-label="Listado de preguntas">
+        <div className="gp-list-heading">
+          <h2 className="gp-section-heading">Preguntas del banco</h2>
+          {!loading && preguntas.length > 0 && (
+            <p className="gp-list-sub">
+              {preguntasFiltradas.length === preguntas.length
+                ? `${preguntas.length} en total`
+                : `${preguntasFiltradas.length} coincidencias`}
+            </p>
+          )}
+        </div>
+
       {loading && preguntas.length === 0 ? (
-        <div className="loading-message">Cargando preguntas...</div>
+        <div className="loading-message">Cargando preguntas…</div>
       ) : preguntas.length === 0 ? (
-        <div className="no-data">No hay preguntas para este capítulo</div>
+        <div className="no-data gp-empty">
+          <p className="gp-empty-title">Todavía no hay preguntas</p>
+          <p className="gp-empty-text">Creá la primera con el formulario de arriba.</p>
+        </div>
+      ) : preguntasFiltradas.length === 0 ? (
+        <div className="no-data gp-empty">
+          <p className="gp-empty-title">Sin resultados</p>
+          <p className="gp-empty-text">Probá otra búsqueda o borrá el filtro.</p>
+          <button type="button" className="btn-secondary" onClick={() => setBusqueda('')}>
+            Limpiar búsqueda
+          </button>
+        </div>
       ) : (
         <div className="preguntas-list">
-          {preguntas.map((pregunta) => (
-            <div key={pregunta.id} className="pregunta-card">
+          {preguntasFiltradas.map((pregunta) => (
+            <article key={pregunta.id} className="pregunta-card">
               <div className="pregunta-header">
-                <h3>Pregunta #{pregunta.id}</h3>
+                <div className="pregunta-header__titles">
+                  <span className="pregunta-id-chip">ID {pregunta.id}</span>
+                  <h3 className="pregunta-card-title">Pregunta</h3>
+                </div>
                 <div className="pregunta-status">
                   <span className={`status-badge ${pregunta.activa ? 'active' : 'inactive'}`}>
                     {pregunta.activa ? 'Activa' : 'Inactiva'}
                   </span>
+                  {pregunta.opciones?.length > 0 && (
+                    <span className="gp-chip gp-chip--muted">{pregunta.opciones.length} opciones</span>
+                  )}
                 </div>
               </div>
 
@@ -676,10 +838,11 @@ const GestionPreguntas = ({ isAuthenticated, userRole }) => {
                   <p className="no-opciones">No hay opciones para esta pregunta</p>
                 )}
               </div>
-            </div>
+            </article>
           ))}
         </div>
       )}
+      </section>
     </div>
   );
 };
