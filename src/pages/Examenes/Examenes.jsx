@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import { examenAPI } from '../../services/api';
+import { examenAPI, videoAPI } from '../../services/api';
 import './Examenes.css';
 
 const Examenes = ({ isAuthenticated, userRole }) => {
@@ -14,13 +14,9 @@ const Examenes = ({ isAuthenticated, userRole }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [capituloSeleccionado, setCapituloSeleccionado] = useState(null);
-  const [habilitaciones, setHabilitaciones] = useState({});
+  const [examenesDisponibles, setExamenesDisponibles] = useState([]);
   const [loadingHabilitaciones, setLoadingHabilitaciones] = useState(true);
 
-  // Capítulos disponibles (1-13)
-  const capitulos = Array.from({ length: 13 }, (_, i) => i + 1);
-
-  // Cargar habilitaciones de exámenes por capítulo
   useEffect(() => {
     const fetchHabilitaciones = async () => {
       if (!isAuthenticated) {
@@ -31,11 +27,7 @@ const Examenes = ({ isAuthenticated, userRole }) => {
       try {
         const response = await examenAPI.getHabilitaciones();
         if (response.success) {
-          const mapa = {};
-          (response.data.habilitaciones || []).forEach((item) => {
-            mapa[String(item.capitulo)] = item.habilitado === true;
-          });
-          setHabilitaciones(mapa);
+          setExamenesDisponibles(response.data.habilitaciones || []);
         }
       } catch (err) {
         console.error('Error al cargar habilitaciones de exámenes:', err);
@@ -47,22 +39,16 @@ const Examenes = ({ isAuthenticated, userRole }) => {
     fetchHabilitaciones();
   }, [isAuthenticated]);
 
-  // Verificar si un examen está desbloqueado por configuración admin
-  const isExamenDesbloqueado = (capitulo) => {
-    // Admin tiene acceso a todo
+  const isExamenDesbloqueado = (item) => {
     if (userRole === 'admin') return true;
-
-    return habilitaciones[String(capitulo)] === true;
+    return item.habilitado === true;
   };
 
-  // Obtener mensaje de bloqueo para un examen
-  const getMensajeBloqueoExamen = (capitulo) => {
+  const getMensajeBloqueoExamen = (item) => {
     if (userRole === 'admin') return null;
-
-    if (habilitaciones[String(capitulo)] !== true) {
+    if (item.habilitado !== true) {
       return 'Examen bloqueado por administración';
     }
-
     return null;
   };
 
@@ -111,14 +97,27 @@ const Examenes = ({ isAuthenticated, userRole }) => {
     }
   }, [currentQuestion, examen, userAnswers]);
 
-  const handleStartExam = async (capitulo) => {
+  const handleStartExam = async (item) => {
     setLoading(true);
     setError(null);
     try {
+      if (userRole !== 'admin' && item.numeroCurso != null) {
+        const unlockRes = await videoAPI.checkExamUnlock(item.numeroCurso);
+        if (!unlockRes.success) {
+          setError(unlockRes.message || 'No se pudo verificar el desbloqueo del examen');
+          setLoading(false);
+          return;
+        }
+        if (unlockRes.data && unlockRes.data.desbloqueado !== true) {
+          setError(unlockRes.data.mensaje || 'Completa los requisitos para este examen');
+          setLoading(false);
+          return;
+        }
+      }
+
       const response = await examenAPI.create({
-        nombre: `Examen Capítulo ${capitulo}`,
-        capitulo: String(capitulo),
-        numPreguntas: 15,
+        capituloId: item.capituloId,
+        nombre: item.nombre,
         tiempoLimite: 60
       });
 
@@ -126,8 +125,7 @@ const Examenes = ({ isAuthenticated, userRole }) => {
         const nuevoExamen = response.data.examen;
         setExamen(nuevoExamen);
         setExamStarted(true);
-        setCapituloSeleccionado(capitulo);
-        // Convertir tiempo límite de minutos a segundos
+        setCapituloSeleccionado(item.capituloId);
         setTimeRemaining((nuevoExamen.tiempoLimite || 60) * 60);
         setCurrentQuestion(0);
         setSelectedAnswer(null);
@@ -370,40 +368,42 @@ const Examenes = ({ isAuthenticated, userRole }) => {
       {loading && <div className="loading-message">Creando examen...</div>}
 
       <div className="exams-section">
-        <h2>Exámenes por Capítulo</h2>
+        <h2>Exámenes</h2>
         <p className="section-description">
-          Selecciona un capítulo para realizar un examen con 15 preguntas aleatorias.
+          Cada tarjeta es un examen configurado por administración. El número de preguntas aleatorias y la disponibilidad los define el capítulo en el panel admin.
           <br />
-          <strong>Nota:</strong> La disponibilidad de cada examen la define administración.
+          <strong>Nota:</strong> Si el examen está ligado a un tema del curso (1–13), puede exigirse haber visto el contenido previo.
         </p>
         {loadingHabilitaciones ? (
           <div className="loading-message">Cargando disponibilidad...</div>
+        ) : examenesDisponibles.length === 0 ? (
+          <div className="loading-message">No hay exámenes configurados.</div>
         ) : (
           <div className="exams-grid">
-            {capitulos.map(capitulo => {
-              const desbloqueado = isExamenDesbloqueado(capitulo);
-              const mensajeBloqueo = getMensajeBloqueoExamen(capitulo);
-              
+            {examenesDisponibles.map((item) => {
+              const desbloqueado = isExamenDesbloqueado(item);
+              const mensajeBloqueo = getMensajeBloqueoExamen(item);
+
               return (
-                <div key={capitulo} className={`exam-card ${!desbloqueado ? 'locked' : ''}`}>
+                <div key={item.capituloId} className={`exam-card ${!desbloqueado ? 'locked' : ''}`}>
                   <div className="exam-icon">{desbloqueado ? '📝' : '🔒'}</div>
-                  <h3>Capítulo {capitulo}</h3>
+                  <h3>{item.nombre}</h3>
                   <div className="exam-info">
                     <span>Duración: 60 minutos</span>
-                    <span>Preguntas: 15</span>
+                    <span>Preguntas (máx.): {item.maxPreguntas ?? 15}</span>
                   </div>
                   {mensajeBloqueo && (
                     <p className="exam-lock-message">{mensajeBloqueo}</p>
                   )}
                   <button
                     className={desbloqueado ? "btn-primary" : "btn-disabled"}
-                    onClick={() => desbloqueado && handleStartExam(capitulo)}
+                    onClick={() => desbloqueado && handleStartExam(item)}
                     disabled={loading || !desbloqueado}
                   >
-                    {loading && capituloSeleccionado === capitulo 
-                      ? 'Creando...' 
-                      : desbloqueado 
-                        ? 'Hacer Examen' 
+                    {loading && capituloSeleccionado === item.capituloId
+                      ? 'Creando...'
+                      : desbloqueado
+                        ? 'Hacer Examen'
                         : 'Bloqueado'}
                   </button>
                 </div>

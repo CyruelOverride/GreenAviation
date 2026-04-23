@@ -265,16 +265,38 @@ export const examenAPI = {
     return apiRequest('/api/examenes/habilitaciones');
   },
 
-  updateHabilitacion: async (capitulo, habilitado) => {
-    return apiRequest(`/api/examenes/habilitaciones/${capitulo}`, {
+  updateHabilitacion: async (capituloId, habilitado) => {
+    return apiRequest(`/api/examenes/habilitaciones/${capituloId}`, {
       method: 'PUT',
       body: JSON.stringify({ habilitado }),
     });
   },
 };
 
+// Capítulos (tabla dominio: nombre, habilitado, max_preguntas)
+export const capituloAPI = {
+  list: async () => {
+    return apiRequest('/api/capitulos');
+  },
+  create: async (payload) => {
+    return apiRequest('/api/capitulos', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
+  },
+  patch: async (id, payload) => {
+    return apiRequest(`/api/capitulos/${id}`, {
+      method: 'PATCH',
+      body: JSON.stringify(payload),
+    });
+  },
+};
+
 // API de Preguntas
 export const preguntaAPI = {
+  getByCapituloId: async (capituloId) => {
+    return apiRequest(`/api/preguntas?capituloId=${capituloId}`);
+  },
   getByCapitulo: async (capitulo) => {
     return apiRequest(`/api/preguntas?capitulo=${capitulo}`);
   },

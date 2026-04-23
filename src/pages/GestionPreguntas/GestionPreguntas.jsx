@@ -1,21 +1,22 @@
 import React, { useState, useEffect } from 'react';
-import { preguntaAPI, opcionAPI, examenAPI } from '../../services/api';
+import { preguntaAPI, opcionAPI, examenAPI, capituloAPI } from '../../services/api';
 import './GestionPreguntas.css';
 
 const GestionPreguntas = ({ isAuthenticated, userRole }) => {
-  const [capituloSeleccionado, setCapituloSeleccionado] = useState('1');
+  const [capitulos, setCapitulos] = useState([]);
+  const [capituloSeleccionadoId, setCapituloSeleccionadoId] = useState('');
   const [preguntas, setPreguntas] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [loadingCapitulos, setLoadingCapitulos] = useState(false);
   const [error, setError] = useState(null);
   const [editingPregunta, setEditingPregunta] = useState(null);
   const [editingOpcion, setEditingOpcion] = useState(null);
   const [saving, setSaving] = useState(false);
-  const [habilitaciones, setHabilitaciones] = useState({});
-  const [loadingHabilitaciones, setLoadingHabilitaciones] = useState(false);
   const [savingHabilitacion, setSavingHabilitacion] = useState(null);
   const [habilitacionesError, setHabilitacionesError] = useState(null);
   const [creating, setCreating] = useState(false);
   const [createError, setCreateError] = useState(null);
+  const [savingMaxPreguntas, setSavingMaxPreguntas] = useState(null);
   const [newPregunta, setNewPregunta] = useState({
     enunciado: '',
     activa: true,
@@ -24,52 +25,80 @@ const GestionPreguntas = ({ isAuthenticated, userRole }) => {
       { texto: '', esCorrecta: false }
     ]
   });
+  const [nuevoCapitulo, setNuevoCapitulo] = useState({
+    nombre: '',
+    numeroCurso: '',
+    maxPreguntas: 15
+  });
+  const [creatingCapitulo, setCreatingCapitulo] = useState(false);
+  const [createCapError, setCreateCapError] = useState(null);
 
-  const capitulos = Array.from({ length: 13 }, (_, i) => String(i + 1));
-
-  useEffect(() => {
-    if (isAuthenticated && userRole === 'admin' && capituloSeleccionado) {
-      loadPreguntas();
-      loadHabilitaciones();
-    }
-  }, [capituloSeleccionado, isAuthenticated, userRole]);
-
-  const loadHabilitaciones = async () => {
-    setLoadingHabilitaciones(true);
+  const loadCapitulos = async () => {
+    setLoadingCapitulos(true);
     setHabilitacionesError(null);
     try {
-      const response = await examenAPI.getHabilitaciones();
+      const response = await capituloAPI.list();
       if (response.success) {
-        const mapa = {};
-        (response.data.habilitaciones || []).forEach((item) => {
-          mapa[String(item.capitulo)] = item.habilitado === true;
+        const list = response.data.capitulos || [];
+        setCapitulos(list);
+        setCapituloSeleccionadoId((prev) => {
+          if (prev && list.some((c) => String(c.id) === String(prev))) return prev;
+          return list[0] ? String(list[0].id) : '';
         });
-        setHabilitaciones(mapa);
       }
     } catch (err) {
-      setHabilitacionesError(err.message || 'Error al cargar habilitaciones de exámenes');
-      console.error('Error al cargar habilitaciones:', err);
+      setHabilitacionesError(err.message || 'Error al cargar capítulos');
+      console.error(err);
     } finally {
-      setLoadingHabilitaciones(false);
+      setLoadingCapitulos(false);
     }
   };
 
-  const handleToggleHabilitacion = async (capitulo, nextValue) => {
-    setSavingHabilitacion(capitulo);
+  useEffect(() => {
+    if (isAuthenticated && userRole === 'admin') {
+      loadCapitulos();
+    }
+  }, [isAuthenticated, userRole]);
+
+  useEffect(() => {
+    if (isAuthenticated && userRole === 'admin' && capituloSeleccionadoId) {
+      loadPreguntas();
+    }
+  }, [capituloSeleccionadoId, isAuthenticated, userRole]);
+
+  const handleToggleHabilitacion = async (capituloId, nextValue) => {
+    setSavingHabilitacion(capituloId);
     setHabilitacionesError(null);
     try {
-      const response = await examenAPI.updateHabilitacion(capitulo, nextValue);
+      const response = await examenAPI.updateHabilitacion(capituloId, nextValue);
       if (response.success) {
-        setHabilitaciones((prev) => ({
-          ...prev,
-          [String(capitulo)]: nextValue
-        }));
+        await loadCapitulos();
       }
     } catch (err) {
       setHabilitacionesError(err.message || 'Error al actualizar habilitación');
-      console.error('Error al actualizar habilitación:', err);
+      console.error(err);
     } finally {
       setSavingHabilitacion(null);
+    }
+  };
+
+  const handleMaxPreguntasBlur = async (capituloId, raw) => {
+    const n = parseInt(String(raw).trim(), 10);
+    if (Number.isNaN(n) || n < 1 || n > 100) return;
+    const cap = capitulos.find((c) => c.id === capituloId);
+    if (cap && cap.maxPreguntas === n) return;
+    setSavingMaxPreguntas(capituloId);
+    setHabilitacionesError(null);
+    try {
+      const response = await capituloAPI.patch(capituloId, { maxPreguntas: n });
+      if (response.success) {
+        await loadCapitulos();
+      }
+    } catch (err) {
+      setHabilitacionesError(err.message || 'Error al guardar máximo de preguntas');
+      console.error(err);
+    } finally {
+      setSavingMaxPreguntas(null);
     }
   };
 
@@ -77,13 +106,13 @@ const GestionPreguntas = ({ isAuthenticated, userRole }) => {
     setLoading(true);
     setError(null);
     try {
-      const response = await preguntaAPI.getByCapitulo(capituloSeleccionado);
+      const response = await preguntaAPI.getByCapituloId(capituloSeleccionadoId);
       if (response.success) {
         setPreguntas(response.data.preguntas);
       }
     } catch (err) {
       setError(err.message || 'Error al cargar preguntas');
-      console.error('Error al cargar preguntas:', err);
+      console.error(err);
     } finally {
       setLoading(false);
     }
@@ -114,7 +143,7 @@ const GestionPreguntas = ({ isAuthenticated, userRole }) => {
       }
     } catch (err) {
       setError(err.message || 'Error al guardar pregunta');
-      console.error('Error al guardar pregunta:', err);
+      console.error(err);
     } finally {
       setSaving(false);
     }
@@ -137,7 +166,7 @@ const GestionPreguntas = ({ isAuthenticated, userRole }) => {
       }
     } catch (err) {
       setError(err.message || 'Error al guardar opción');
-      console.error('Error al guardar opción:', err);
+      console.error(err);
     } finally {
       setSaving(false);
     }
@@ -243,7 +272,7 @@ const GestionPreguntas = ({ isAuthenticated, userRole }) => {
     try {
       const response = await preguntaAPI.create({
         enunciado: newPregunta.enunciado.trim(),
-        capitulo: capituloSeleccionado,
+        capituloId: parseInt(capituloSeleccionadoId, 10),
         activa: newPregunta.activa,
         opciones: newPregunta.opciones.map((opcion) => ({
           texto: opcion.texto.trim(),
@@ -257,13 +286,47 @@ const GestionPreguntas = ({ isAuthenticated, userRole }) => {
       }
     } catch (err) {
       setCreateError(err.message || 'Error al crear pregunta');
-      console.error('Error al crear pregunta:', err);
+      console.error(err);
     } finally {
       setCreating(false);
     }
   };
 
-  // Verificar acceso admin
+  const handleCreateCapitulo = async (e) => {
+    e.preventDefault();
+    setCreateCapError(null);
+    const nombre = nuevoCapitulo.nombre.trim();
+    if (!nombre) {
+      setCreateCapError('El nombre del capítulo es requerido');
+      return;
+    }
+    setCreatingCapitulo(true);
+    try {
+      const payload = {
+        nombre,
+        maxPreguntas: parseInt(nuevoCapitulo.maxPreguntas, 10) || 15
+      };
+      if (nuevoCapitulo.numeroCurso !== '' && nuevoCapitulo.numeroCurso != null) {
+        payload.numeroCurso = parseInt(nuevoCapitulo.numeroCurso, 10);
+      }
+      const response = await capituloAPI.create(payload);
+      if (response.success) {
+        setNuevoCapitulo({ nombre: '', numeroCurso: '', maxPreguntas: 15 });
+        await loadCapitulos();
+        if (response.data?.capitulo?.id) {
+          setCapituloSeleccionadoId(String(response.data.capitulo.id));
+        }
+      }
+    } catch (err) {
+      setCreateCapError(err.message || 'Error al crear capítulo');
+      console.error(err);
+    } finally {
+      setCreatingCapitulo(false);
+    }
+  };
+
+  const capituloActivo = capitulos.find((c) => String(c.id) === String(capituloSeleccionadoId));
+
   if (!isAuthenticated || userRole !== 'admin') {
     return (
       <div className="gestion-preguntas">
@@ -280,43 +343,109 @@ const GestionPreguntas = ({ isAuthenticated, userRole }) => {
       <h1 className="page-title">Gestión de Preguntas</h1>
 
       <div className="filters-section">
-        <label htmlFor="capitulo-select">Seleccionar Capítulo:</label>
+        <label htmlFor="capitulo-select">Capítulo / examen:</label>
         <select
           id="capitulo-select"
-          value={capituloSeleccionado}
-          onChange={(e) => setCapituloSeleccionado(e.target.value)}
+          value={capituloSeleccionadoId}
+          onChange={(e) => setCapituloSeleccionadoId(e.target.value)}
           className="capitulo-select"
+          disabled={loadingCapitulos || capitulos.length === 0}
         >
-          {capitulos.map(cap => (
-            <option key={cap} value={cap}>Capítulo {cap}</option>
+          {capitulos.map((c) => (
+            <option key={c.id} value={c.id}>
+              {c.nombre}
+              {c.numeroCurso != null ? ` (tema curso ${c.numeroCurso})` : ''}
+            </option>
           ))}
         </select>
-        <button className="btn-secondary" onClick={loadPreguntas} disabled={loading}>
+        <button className="btn-secondary" onClick={() => { loadCapitulos(); loadPreguntas(); }} disabled={loading}>
           {loading ? 'Cargando...' : 'Recargar'}
         </button>
       </div>
 
-      <div className="exam-access-section">
-        <h2>Habilitación de Exámenes por Capítulo</h2>
+      <div className="create-capitulo-section" style={{ marginBottom: '1.5rem' }}>
+        <h2>Crear capítulo de examen</h2>
         <p className="exam-access-description">
-          Define qué capítulos están habilitados para que los alumnos puedan rendir examen.
+          Nuevo banco de preguntas con nombre propio. Opcional: número de tema del curso (1–13) para vídeos y progreso.
+        </p>
+        {createCapError && <div className="error-message">{createCapError}</div>}
+        <form onSubmit={handleCreateCapitulo} className="create-question-form" style={{ maxWidth: 520 }}>
+          <label className="form-label">
+            Nombre
+            <input
+              type="text"
+              value={nuevoCapitulo.nombre}
+              onChange={(e) => setNuevoCapitulo((p) => ({ ...p, nombre: e.target.value }))}
+              className="edit-textarea"
+              style={{ minHeight: '2rem' }}
+              placeholder="Ej. Examen prueba Dinacia"
+            />
+          </label>
+          <label className="form-label">
+            Nº tema del curso (opcional, 1–13)
+            <input
+              type="number"
+              min={1}
+              max={13}
+              value={nuevoCapitulo.numeroCurso}
+              onChange={(e) => setNuevoCapitulo((p) => ({ ...p, numeroCurso: e.target.value }))}
+              placeholder="Vacío = solo nombre"
+            />
+          </label>
+          <label className="form-label">
+            Máx. preguntas en examen aleatorio
+            <input
+              type="number"
+              min={1}
+              max={100}
+              value={nuevoCapitulo.maxPreguntas}
+              onChange={(e) => setNuevoCapitulo((p) => ({ ...p, maxPreguntas: e.target.value }))}
+            />
+          </label>
+          <button type="submit" className="btn-primary" disabled={creatingCapitulo}>
+            {creatingCapitulo ? 'Creando...' : 'Crear capítulo'}
+          </button>
+        </form>
+      </div>
+
+      <div className="exam-access-section">
+        <h2>Habilitación y máximo de preguntas por examen</h2>
+        <p className="exam-access-description">
+          Define si los alumnos pueden rendir cada examen y cuántas preguntas aleatorias incluye cada intento (máximo 100).
         </p>
         {habilitacionesError && <div className="error-message">{habilitacionesError}</div>}
-        {loadingHabilitaciones ? (
-          <div className="loading-message">Cargando habilitaciones...</div>
+        {loadingCapitulos ? (
+          <div className="loading-message">Cargando capítulos...</div>
         ) : (
           <div className="exam-access-grid">
-            {capitulos.map((capitulo) => {
-              const habilitado = habilitaciones[capitulo] === true;
-              const bloqueado = savingHabilitacion === capitulo;
+            {capitulos.map((c) => {
+              const habilitado = c.habilitado === true;
+              const bloqueado = savingHabilitacion === c.id;
+              const guardandoMax = savingMaxPreguntas === c.id;
 
               return (
-                <div key={`habilitacion-${capitulo}`} className="exam-access-item">
-                  <span className="exam-access-title">Capítulo {capitulo}</span>
+                <div key={`habilitacion-${c.id}`} className="exam-access-item">
+                  <span className="exam-access-title">{c.nombre}</span>
+                  {c.numeroCurso != null && (
+                    <span className="exam-access-sub">Tema curso: {c.numeroCurso}</span>
+                  )}
+                  <label className="form-label" style={{ marginTop: '0.5rem' }}>
+                    Máx. preguntas
+                    <input
+                      type="number"
+                      min={1}
+                      max={100}
+                      defaultValue={c.maxPreguntas}
+                      key={`max-${c.id}-${c.maxPreguntas}`}
+                      disabled={guardandoMax}
+                      onBlur={(e) => handleMaxPreguntasBlur(c.id, e.target.value)}
+                    />
+                  </label>
+                  {guardandoMax && <span className="loading-inline">Guardando...</span>}
                   <button
                     type="button"
                     className={`toggle-btn ${habilitado ? 'enabled' : 'disabled'}`}
-                    onClick={() => handleToggleHabilitacion(capitulo, !habilitado)}
+                    onClick={() => handleToggleHabilitacion(c.id, !habilitado)}
                     disabled={bloqueado}
                   >
                     {bloqueado ? 'Guardando...' : habilitado ? 'Habilitado' : 'Bloqueado'}
@@ -329,7 +458,23 @@ const GestionPreguntas = ({ isAuthenticated, userRole }) => {
       </div>
 
       <div className="create-question-section">
-        <h2>Crear Nueva Pregunta</h2>
+        <div className="context-banner" style={{
+          padding: '12px 16px',
+          marginBottom: '1rem',
+          background: 'var(--card-bg, #f0f4f8)',
+          borderRadius: 8,
+          borderLeft: '4px solid #2563eb'
+        }}>
+          <strong>Creando preguntas para:</strong>{' '}
+          {capituloActivo ? capituloActivo.nombre : '…'}
+          {capituloActivo?.numeroCurso != null && (
+            <span> — Tema del curso: {capituloActivo.numeroCurso}</span>
+          )}
+          {capituloActivo && (
+            <span> — Hasta {capituloActivo.maxPreguntas} preguntas por examen aleatorio</span>
+          )}
+        </div>
+        <h2>Crear nueva pregunta</h2>
         {createError && <div className="error-message">{createError}</div>}
         <form onSubmit={handleCreatePregunta} className="create-question-form">
           <label className="form-label">
@@ -394,7 +539,7 @@ const GestionPreguntas = ({ isAuthenticated, userRole }) => {
           </div>
 
           <div className="edit-actions">
-            <button type="submit" className="btn-primary" disabled={creating}>
+            <button type="submit" className="btn-primary" disabled={creating || !capituloSeleccionadoId}>
               {creating ? 'Creando...' : 'Crear pregunta'}
             </button>
           </div>
@@ -540,4 +685,3 @@ const GestionPreguntas = ({ isAuthenticated, userRole }) => {
 };
 
 export default GestionPreguntas;
-
