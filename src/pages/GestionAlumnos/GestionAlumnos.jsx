@@ -11,6 +11,8 @@ const GestionAlumnos = ({ userRole, isAuthenticated }) => {
   const [historialAlumno, setHistorialAlumno] = useState(null);
   const [loadingHistorial, setLoadingHistorial] = useState(false);
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [editingStudent, setEditingStudent] = useState(null);
+  const [editLoading, setEditLoading] = useState(false);
   const [editingDriveLink, setEditingDriveLink] = useState(null);
   const [driveLinkValue, setDriveLinkValue] = useState('');
   const [createFormData, setCreateFormData] = useState({
@@ -60,6 +62,27 @@ const GestionAlumnos = ({ userRole, isAuthenticated }) => {
   });
   const [createLoading, setCreateLoading] = useState(false);
 
+  const getInitialEditFormData = (student = {}) => ({
+    nombre: student.nombre || '',
+    apellido: student.apellido || '',
+    cedula: student.cedula || '',
+    numeroTelefono: student.numeroTelefono || '',
+    telefono: student.telefono || '',
+    celular: student.celular || '',
+    fechaNac: student.fechaNac ? new Date(student.fechaNac).toISOString().split('T')[0] : '',
+    direccion: student.direccion || '',
+    departamento: student.departamento || '',
+    ciudad: student.ciudad || '',
+    sexo: student.sexo || '',
+    contactoEmergencia: student.contactoEmergencia || '',
+    nombreEmergencia: student.nombreEmergencia || '',
+    emergenciaMedica: student.emergenciaMedica || '',
+    fechaInicioCurso: student.fechaInicioCurso ? new Date(student.fechaInicioCurso).toISOString().split('T')[0] : '',
+    estado: student.estado || 'Cursando',
+    progreso: student.progreso ?? 0
+  });
+  const [editFormData, setEditFormData] = useState(getInitialEditFormData());
+
   // Cargar estudiantes
   useEffect(() => {
     if (isAuthenticated && userRole === 'admin') {
@@ -104,6 +127,72 @@ const GestionAlumnos = ({ userRole, isAuthenticated }) => {
   const handleCloseDetails = () => {
     setSelectedStudent(null);
     setHistorialAlumno(null);
+  };
+
+  const handleOpenEditStudent = (student) => {
+    setEditingStudent(student);
+    setEditFormData(getInitialEditFormData(student));
+  };
+
+  const handleCloseEditStudent = () => {
+    setEditingStudent(null);
+    setEditFormData(getInitialEditFormData());
+  };
+
+  const handleEditInputChange = (e) => {
+    const { name, value } = e.target;
+    setEditFormData(prev => ({
+      ...prev,
+      [name]: name === 'progreso' ? (value === '' ? '' : Number(value)) : value
+    }));
+  };
+
+  const handleUpdateStudent = async (e) => {
+    e.preventDefault();
+    const studentId = editingStudent?.id || editingStudent?._id;
+    if (!studentId) {
+      alert('Error: No se pudo identificar el ID del alumno');
+      return;
+    }
+
+    try {
+      setEditLoading(true);
+      const payload = {
+        ...editFormData,
+        cedula: editFormData.cedula || null,
+        numeroTelefono: editFormData.numeroTelefono || null,
+        telefono: editFormData.telefono || null,
+        celular: editFormData.celular || null,
+        fechaNac: editFormData.fechaNac || null,
+        direccion: editFormData.direccion || null,
+        departamento: editFormData.departamento || null,
+        ciudad: editFormData.ciudad || null,
+        sexo: editFormData.sexo || null,
+        contactoEmergencia: editFormData.contactoEmergencia || null,
+        nombreEmergencia: editFormData.nombreEmergencia || null,
+        emergenciaMedica: editFormData.emergenciaMedica || null,
+        fechaInicioCurso: editFormData.fechaInicioCurso || null,
+        progreso: editFormData.progreso === '' ? 0 : Number(editFormData.progreso)
+      };
+
+      const response = await userAPI.update(studentId, payload);
+      if (response.success) {
+        const updatedStudent = response.data?.user || { ...editingStudent, ...payload };
+        setStudents(prev => prev.map(s => ((s.id || s._id) === studentId ? { ...s, ...updatedStudent } : s)));
+
+        if (selectedStudent && (selectedStudent.id || selectedStudent._id) === studentId) {
+          setSelectedStudent(prev => ({ ...prev, ...updatedStudent }));
+        }
+
+        alert('Alumno actualizado exitosamente');
+        handleCloseEditStudent();
+      }
+    } catch (err) {
+      alert(err.message || 'Error al actualizar el alumno');
+      console.error('Error updating student:', err);
+    } finally {
+      setEditLoading(false);
+    }
   };
 
   const handleExportStudent = async (student) => {
@@ -428,6 +517,12 @@ const GestionAlumnos = ({ userRole, isAuthenticated }) => {
                     </td>
                     <td>
                       <div className="action-buttons">
+                        <button
+                          className="btn-secondary"
+                          onClick={() => handleOpenEditStudent(student)}
+                        >
+                          Editar
+                        </button>
                         <button 
                           className="btn-secondary"
                           onClick={() => handleViewDetails(student)}
@@ -962,6 +1057,223 @@ const GestionAlumnos = ({ userRole, isAuthenticated }) => {
                 Guardar
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Editar Alumno */}
+      {editingStudent && (
+        <div className="student-modal">
+          <div className="modal-content" style={{ maxWidth: '800px', maxHeight: '90vh', overflowY: 'auto' }}>
+            <div className="modal-header">
+              <h2>Editar Alumno</h2>
+              <button className="modal-close" onClick={handleCloseEditStudent}>×</button>
+            </div>
+            <form onSubmit={handleUpdateStudent} className="modal-body">
+              <div className="form-row">
+                <div className="form-group">
+                  <label>Nombre *</label>
+                  <input
+                    type="text"
+                    name="nombre"
+                    value={editFormData.nombre}
+                    onChange={handleEditInputChange}
+                    required
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Apellido *</label>
+                  <input
+                    type="text"
+                    name="apellido"
+                    value={editFormData.apellido}
+                    onChange={handleEditInputChange}
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="form-row">
+                <div className="form-group">
+                  <label>Cédula</label>
+                  <input
+                    type="text"
+                    name="cedula"
+                    value={editFormData.cedula}
+                    onChange={handleEditInputChange}
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Fecha de Nacimiento</label>
+                  <input
+                    type="date"
+                    name="fechaNac"
+                    value={editFormData.fechaNac}
+                    onChange={handleEditInputChange}
+                  />
+                </div>
+              </div>
+
+              <div className="form-row">
+                <div className="form-group">
+                  <label>Teléfono</label>
+                  <input
+                    type="text"
+                    name="numeroTelefono"
+                    value={editFormData.numeroTelefono}
+                    onChange={handleEditInputChange}
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Celular</label>
+                  <input
+                    type="text"
+                    name="celular"
+                    value={editFormData.celular}
+                    onChange={handleEditInputChange}
+                  />
+                </div>
+              </div>
+
+              <div className="form-row">
+                <div className="form-group">
+                  <label>Teléfono Fijo</label>
+                  <input
+                    type="text"
+                    name="telefono"
+                    value={editFormData.telefono}
+                    onChange={handleEditInputChange}
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Sexo</label>
+                  <select
+                    name="sexo"
+                    value={editFormData.sexo}
+                    onChange={handleEditInputChange}
+                  >
+                    <option value="">Seleccionar</option>
+                    <option value="Hombre">Hombre</option>
+                    <option value="Mujer">Mujer</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="form-group">
+                <label>Dirección</label>
+                <input
+                  type="text"
+                  name="direccion"
+                  value={editFormData.direccion}
+                  onChange={handleEditInputChange}
+                />
+              </div>
+
+              <div className="form-row">
+                <div className="form-group">
+                  <label>Ciudad</label>
+                  <input
+                    type="text"
+                    name="ciudad"
+                    value={editFormData.ciudad}
+                    onChange={handleEditInputChange}
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Departamento</label>
+                  <input
+                    type="text"
+                    name="departamento"
+                    value={editFormData.departamento}
+                    onChange={handleEditInputChange}
+                  />
+                </div>
+              </div>
+
+              <div className="form-row">
+                <div className="form-group">
+                  <label>Nombre de Emergencia</label>
+                  <input
+                    type="text"
+                    name="nombreEmergencia"
+                    value={editFormData.nombreEmergencia}
+                    onChange={handleEditInputChange}
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Contacto de Emergencia</label>
+                  <input
+                    type="text"
+                    name="contactoEmergencia"
+                    value={editFormData.contactoEmergencia}
+                    onChange={handleEditInputChange}
+                  />
+                </div>
+              </div>
+
+              <div className="form-group">
+                <label>Emergencia Médica</label>
+                <textarea
+                  name="emergenciaMedica"
+                  value={editFormData.emergenciaMedica}
+                  onChange={handleEditInputChange}
+                  rows="3"
+                />
+              </div>
+
+              <div className="form-row">
+                <div className="form-group">
+                  <label>Fecha de Inicio del Curso</label>
+                  <input
+                    type="date"
+                    name="fechaInicioCurso"
+                    value={editFormData.fechaInicioCurso}
+                    onChange={handleEditInputChange}
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Estado</label>
+                  <select
+                    name="estado"
+                    value={editFormData.estado}
+                    onChange={handleEditInputChange}
+                  >
+                    <option value="Cursando">Cursando</option>
+                    <option value="Finalizado">Finalizado</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="form-group">
+                <label>Progreso (%)</label>
+                <input
+                  type="number"
+                  name="progreso"
+                  value={editFormData.progreso}
+                  onChange={handleEditInputChange}
+                  min="0"
+                  max="100"
+                />
+              </div>
+
+              <div className="modal-footer">
+                <button
+                  type="button"
+                  className="btn-secondary"
+                  onClick={handleCloseEditStudent}
+                  disabled={editLoading}
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  className="btn-primary"
+                  disabled={editLoading}
+                >
+                  {editLoading ? 'Guardando...' : 'Guardar cambios'}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

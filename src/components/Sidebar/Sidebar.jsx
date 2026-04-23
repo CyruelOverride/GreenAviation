@@ -71,7 +71,7 @@ const Sidebar = ({ userRole, isAuthenticated, isOpen, onClose }) => {
                 </Link>
                 <Link to="/estudio-teorico" className="nav-subitem" onClick={handleLinkClick}>
                   <span className="subitem-icon">•</span>
-                  <span>Guía de Maniobras</span>
+                  <span>Videos de maniobras</span>
                 </Link>
               </div>
             )}

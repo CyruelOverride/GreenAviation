@@ -84,22 +84,7 @@ const Home = () => {
           <h1 className="hero-title">TU SUEÑO COMIENZA AQUÍ</h1>
           <h2 className="hero-subtitle">CAMPUS VIRTUAL – CURSO DE PILOTO PRIVADO</h2>
           <p className="hero-tagline">Enseñamos y formamos aviadores.</p>
-          <div className="hero-buttons">
-            <a href="https://wa.me/59899731578" target="_blank" rel="noopener noreferrer" className="btn-primary">Comenzar curso</a>
-            <a
-              href="/#seccion-descripcion"
-              className="btn-secondary"
-              onClick={(e) => {
-                if (location.pathname === '/') {
-                  e.preventDefault();
-                  document.getElementById('seccion-descripcion')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                  window.history.pushState(null, '', '/#seccion-descripcion');
-                }
-              }}
-            >
-              Ver programa
-            </a>
-          </div>
+          <h2 className="hero-subtitle">CAMPUS VIRTUAL</h2>
         </div>
       </section>
 
