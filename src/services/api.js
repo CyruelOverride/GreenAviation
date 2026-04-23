@@ -260,12 +260,30 @@ export const examenAPI = {
     const query = usuarioId ? `?usuarioId=${usuarioId}` : '';
     return apiRequest(`/api/examenes/stats${query}`);
   },
+
+  getHabilitaciones: async () => {
+    return apiRequest('/api/examenes/habilitaciones');
+  },
+
+  updateHabilitacion: async (capitulo, habilitado) => {
+    return apiRequest(`/api/examenes/habilitaciones/${capitulo}`, {
+      method: 'PUT',
+      body: JSON.stringify({ habilitado }),
+    });
+  },
 };
 
 // API de Preguntas
 export const preguntaAPI = {
   getByCapitulo: async (capitulo) => {
     return apiRequest(`/api/preguntas?capitulo=${capitulo}`);
+  },
+
+  create: async (preguntaData) => {
+    return apiRequest('/api/preguntas', {
+      method: 'POST',
+      body: JSON.stringify(preguntaData),
+    });
   },
 
   update: async (id, preguntaData) => {

@@ -1,16 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import { examenAPI, videoAPI } from '../../services/api';
+import { examenAPI } from '../../services/api';
 import './Examenes.css';
-
-// Función para obtener los videos que corresponden a un capítulo
-// Capítulo 1: videos 1, 2, 3
-// Capítulo 2: videos 4, 5, 6
-// etc.
-const getVideosDelCapitulo = (capitulo) => {
-  const primerVideo = (capitulo - 1) * 3 + 1;
-  return [primerVideo, primerVideo + 1, primerVideo + 2];
-};
 
 const Examenes = ({ isAuthenticated, userRole }) => {
   const [examen, setExamen] = useState(null);
@@ -23,61 +14,55 @@ const Examenes = ({ isAuthenticated, userRole }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [capituloSeleccionado, setCapituloSeleccionado] = useState(null);
-  const [videosVistos, setVideosVistos] = useState({});
-  const [loadingProgress, setLoadingProgress] = useState(true);
+  const [habilitaciones, setHabilitaciones] = useState({});
+  const [loadingHabilitaciones, setLoadingHabilitaciones] = useState(true);
 
   // Capítulos disponibles (1-13)
   const capitulos = Array.from({ length: 13 }, (_, i) => i + 1);
 
-  // Cargar progreso de videos al iniciar
+  // Cargar habilitaciones de exámenes por capítulo
   useEffect(() => {
-    const fetchProgress = async () => {
+    const fetchHabilitaciones = async () => {
       if (!isAuthenticated) {
-        setLoadingProgress(false);
+        setLoadingHabilitaciones(false);
         return;
       }
 
       try {
-        const response = await videoAPI.getProgress();
+        const response = await examenAPI.getHabilitaciones();
         if (response.success) {
-          setVideosVistos(response.data.videosVistos || {});
+          const mapa = {};
+          (response.data.habilitaciones || []).forEach((item) => {
+            mapa[String(item.capitulo)] = item.habilitado === true;
+          });
+          setHabilitaciones(mapa);
         }
       } catch (err) {
-        console.error('Error al cargar progreso de videos:', err);
+        console.error('Error al cargar habilitaciones de exámenes:', err);
       } finally {
-        setLoadingProgress(false);
+        setLoadingHabilitaciones(false);
       }
     };
 
-    fetchProgress();
+    fetchHabilitaciones();
   }, [isAuthenticated]);
 
-  // Verificar si un examen está desbloqueado (si se vieron todos los videos del capítulo)
+  // Verificar si un examen está desbloqueado por configuración admin
   const isExamenDesbloqueado = (capitulo) => {
     // Admin tiene acceso a todo
     if (userRole === 'admin') return true;
-    
-    const videosDelCapitulo = getVideosDelCapitulo(capitulo);
-    
-    // Verificar que todos los videos del capítulo hayan sido vistos (completados)
-    return videosDelCapitulo.every(videoNumero => 
-      videosVistos[videoNumero]?.completado === true
-    );
+
+    return habilitaciones[String(capitulo)] === true;
   };
 
   // Obtener mensaje de bloqueo para un examen
   const getMensajeBloqueoExamen = (capitulo) => {
     if (userRole === 'admin') return null;
-    
-    const videosDelCapitulo = getVideosDelCapitulo(capitulo);
-    const videosNoVistos = videosDelCapitulo.filter(
-      videoNumero => !videosVistos[videoNumero]?.completado
-    );
-    
-    if (videosNoVistos.length > 0) {
-      return `Debes ver los videos ${videosNoVistos.join(', ')} para desbloquear este examen`;
+
+    if (habilitaciones[String(capitulo)] !== true) {
+      return 'Examen bloqueado por administración';
     }
-    
+
     return null;
   };
 
@@ -389,10 +374,10 @@ const Examenes = ({ isAuthenticated, userRole }) => {
         <p className="section-description">
           Selecciona un capítulo para realizar un examen con 15 preguntas aleatorias.
           <br />
-          <strong>Nota:</strong> Debes ver todos los videos de un capítulo para desbloquear su examen.
+          <strong>Nota:</strong> La disponibilidad de cada examen la define administración.
         </p>
-        {loadingProgress ? (
-          <div className="loading-message">Cargando progreso...</div>
+        {loadingHabilitaciones ? (
+          <div className="loading-message">Cargando disponibilidad...</div>
         ) : (
           <div className="exams-grid">
             {capitulos.map(capitulo => {
