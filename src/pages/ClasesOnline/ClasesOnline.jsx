@@ -21,11 +21,14 @@ const ClasesOnline = ({ isAuthenticated, userRole }) => {
     fechaHoraInicio: new Date().toISOString().slice(0, 16),
     fechaHoraFin: '',
     instructorId: '',
-    estado: 'Pendiente'
+    estado: 'Pendiente',
+    linkGrabacion: '',
+    codigoAcceso: ''
   });
 
   const [grabacionData, setGrabacionData] = useState({
     linkGrabacion: '',
+    codigoAcceso: '',
     estado: 'Grabacion'
   });
 
@@ -73,7 +76,8 @@ const ClasesOnline = ({ isAuthenticated, userRole }) => {
         link: formData.link,
         fechaHoraInicio: formData.fechaHoraInicio,
         fechaHoraFin: formData.fechaHoraFin || null,
-        instructorId: formData.instructorId || null
+        instructorId: formData.instructorId || null,
+        codigoAcceso: formData.codigoAcceso?.trim() || undefined
       };
 
       await claseOnlineAPI.create(claseData);
@@ -91,26 +95,24 @@ const ClasesOnline = ({ isAuthenticated, userRole }) => {
     if (!selectedClase) return;
 
     try {
-      // Si la clase está terminada y se quiere cambiar a Grabacion
-      if (selectedClase.estado === 'Terminada' && formData.estado === 'Grabacion') {
+      // Clase terminada: solo publicar grabación (pasa a Grabacion)
+      if (selectedClase.estado === 'Terminada') {
         const updateData = {
           estado: 'Grabacion',
-          linkGrabacion: formData.linkGrabacion || selectedClase.linkGrabacion
+          linkGrabacion: formData.linkGrabacion || selectedClase.linkGrabacion,
+          codigoAcceso: formData.codigoAcceso
         };
         await claseOnlineAPI.update(selectedClase.id, updateData);
-      } else if (selectedClase.estado !== 'Terminada') {
-        // Solo se puede modificar si no está terminada
+      } else {
         const updateData = {
           link: formData.link,
           fechaHoraInicio: formData.fechaHoraInicio,
           fechaHoraFin: formData.fechaHoraFin || null,
           estado: formData.estado,
-          instructorId: formData.instructorId || null
+          instructorId: formData.instructorId || null,
+          codigoAcceso: formData.codigoAcceso
         };
         await claseOnlineAPI.update(selectedClase.id, updateData);
-      } else {
-        alert('No se puede modificar una clase terminada. Solo se puede cambiar a "Grabacion"');
-        return;
       }
 
       alert('Clase online actualizada exitosamente!');
@@ -196,7 +198,8 @@ const ClasesOnline = ({ isAuthenticated, userRole }) => {
         : '',
       instructorId: clase.instructorId || '',
       estado: clase.estado || 'Pendiente',
-      linkGrabacion: clase.linkGrabacion || ''
+      linkGrabacion: clase.linkGrabacion || '',
+      codigoAcceso: clase.codigoAcceso ?? ''
     });
     setShowEditModal(true);
   };
@@ -210,6 +213,7 @@ const ClasesOnline = ({ isAuthenticated, userRole }) => {
     setSelectedClase(clase);
     setGrabacionData({
       linkGrabacion: clase.linkGrabacion || '',
+      codigoAcceso: clase.codigoAcceso ?? '',
       estado: 'Grabacion'
     });
     setShowGrabacionModal(true);
@@ -222,7 +226,8 @@ const ClasesOnline = ({ isAuthenticated, userRole }) => {
     try {
       await claseOnlineAPI.update(selectedClase.id, {
         estado: 'Grabacion',
-        linkGrabacion: grabacionData.linkGrabacion
+        linkGrabacion: grabacionData.linkGrabacion,
+        codigoAcceso: grabacionData.codigoAcceso
       });
       alert('Grabación guardada exitosamente!');
       setShowGrabacionModal(false);
@@ -239,7 +244,9 @@ const ClasesOnline = ({ isAuthenticated, userRole }) => {
       fechaHoraInicio: new Date().toISOString().slice(0, 16),
       fechaHoraFin: '',
       instructorId: '',
-      estado: 'Pendiente'
+      estado: 'Pendiente',
+      linkGrabacion: '',
+      codigoAcceso: ''
     });
   };
 
@@ -401,6 +408,12 @@ const ClasesOnline = ({ isAuthenticated, userRole }) => {
                     <span>{clase.alumnos.length} alumno(s) registrado(s)</span>
                   </div>
                 )}
+                {clase.codigoAcceso && (
+                  <div className="detail-item">
+                    <span className="detail-icon">🔑</span>
+                    <span className="codigo-acceso-text">Código de acceso: {clase.codigoAcceso}</span>
+                  </div>
+                )}
               </div>
 
               <div className="class-actions-bottom">
@@ -501,6 +514,17 @@ const ClasesOnline = ({ isAuthenticated, userRole }) => {
                 </select>
                 <small>Si no se selecciona, se usará el usuario logueado</small>
               </div>
+              <div className="form-group">
+                <label>Código de acceso (opcional)</label>
+                <input
+                  type="text"
+                  className="input-codigo-acceso"
+                  value={formData.codigoAcceso}
+                  onChange={(e) => setFormData({ ...formData, codigoAcceso: e.target.value })}
+                  placeholder="Ej. contraseña de la reunión"
+                  autoComplete="off"
+                />
+              </div>
               <div className="form-actions">
                 <button type="button" onClick={() => setShowCreateModal(false)} className="btn-secondary">
                   Cancelar
@@ -524,17 +548,30 @@ const ClasesOnline = ({ isAuthenticated, userRole }) => {
             </div>
             <form onSubmit={handleUpdateClase} className="clase-form">
               {selectedClase.estado === 'Terminada' ? (
-                <div className="form-group">
-                  <label>Link de Grabación *</label>
-                  <input
-                    type="url"
-                    value={formData.linkGrabacion}
-                    onChange={(e) => setFormData({ ...formData, linkGrabacion: e.target.value })}
-                    placeholder="https://drive.google.com/..."
-                    required
-                  />
-                  <small>Al guardar, la clase cambiará a estado "Grabacion"</small>
-                </div>
+                <>
+                  <div className="form-group">
+                    <label>Link de Grabación *</label>
+                    <input
+                      type="url"
+                      value={formData.linkGrabacion}
+                      onChange={(e) => setFormData({ ...formData, linkGrabacion: e.target.value })}
+                      placeholder="https://drive.google.com/..."
+                      required
+                    />
+                    <small>Al guardar, la clase cambiará a estado "Grabacion"</small>
+                  </div>
+                  <div className="form-group">
+                    <label>Código de acceso (opcional)</label>
+                    <input
+                      type="text"
+                      className="input-codigo-acceso"
+                      value={formData.codigoAcceso}
+                      onChange={(e) => setFormData({ ...formData, codigoAcceso: e.target.value })}
+                      placeholder="Si aplica para la grabación"
+                      autoComplete="off"
+                    />
+                  </div>
+                </>
               ) : (
                 <>
                   <div className="form-group">
@@ -632,6 +669,12 @@ const ClasesOnline = ({ isAuthenticated, userRole }) => {
                   </a>
                 </div>
               )}
+              {selectedClase.codigoAcceso && (
+                <div className="detail-row">
+                  <strong>Código de acceso:</strong>
+                  <span className="codigo-acceso-text">{selectedClase.codigoAcceso}</span>
+                </div>
+              )}
               <div className="detail-row">
                 <strong>Fecha y Hora de Inicio:</strong>
                 <span>{formatDateTime(selectedClase.fechaHoraInicio)}</span>
@@ -684,6 +727,17 @@ const ClasesOnline = ({ isAuthenticated, userRole }) => {
                   required
                 />
                 <small>Al guardar, la clase cambiará a estado "Grabacion"</small>
+              </div>
+              <div className="form-group">
+                <label>Código de acceso (opcional)</label>
+                <input
+                  type="text"
+                  className="input-codigo-acceso"
+                  value={grabacionData.codigoAcceso}
+                  onChange={(e) => setGrabacionData({ ...grabacionData, codigoAcceso: e.target.value })}
+                  placeholder="Si aplica para ver la grabación"
+                  autoComplete="off"
+                />
               </div>
               <div className="form-actions">
                 <button type="button" onClick={() => setShowGrabacionModal(false)} className="btn-secondary">
