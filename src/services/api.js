@@ -399,6 +399,11 @@ export const recursoAPI = {
     return apiRequest(`/api/recursos${queryParams ? `?${queryParams}` : ''}`);
   },
 
+  // Videos del curso teórico (categoria videoTeorico)
+  getVideosTeorico: async () => {
+    return apiRequest('/api/recursos/videos-teorico');
+  },
+
   // Obtener un recurso por ID
   getById: async (id) => {
     return apiRequest(`/api/recursos/${id}`);

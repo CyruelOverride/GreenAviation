@@ -1,89 +1,73 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { videoAPI } from '../../services/api';
+import { videoAPI, recursoAPI } from '../../services/api';
 import './EstudioTeorico.css';
-
-// Lista de videos del curso con sus links de Google Drive
-const videosDelCurso = [
-  { numero: 1, titulo: 'Principios del vuelo', driveLink: 'https://drive.google.com/file/d/1gufozkH1NeP8282OUCoNAu2VcDPVKvid/view?usp=drive_link' },
-  { numero: 2, titulo: 'Resistencia parásita', driveLink: 'https://drive.google.com/file/d/1EEQZ0W93haLzt786nKmMCA5g3nSDxBOM/view?usp=drive_link' },
-  { numero: 3, titulo: 'Factores de carga', driveLink: 'https://drive.google.com/file/d/1W5MZnQRVsW9-uQPZLPOTrCMUK2rrzXhQ/view?usp=drivesdk' },
-  { numero: 4, titulo: 'Virajes ROT y radio', driveLink: 'https://drive.google.com/file/d/1wwUn2ziJ1M0x9jKTbAmbYXFh9xeW_PbB/view?usp=drivesdk' },
-  { numero: 5, titulo: 'Tipos de estabilidad', driveLink: 'https://drive.google.com/file/d/11A01VByhBZDkK4scUdcvHJ0whbm5b-Nu/view?usp=drive_link' },
-  { numero: 6, titulo: 'Estabilidad de los 3 ejes', driveLink: 'https://drive.google.com/file/d/1ujo7U9hmyrakiQydBKjZul_Klm4kTcLx/view?usp=drive_link' },
-  { numero: 7, titulo: 'Controles de vuelo', driveLink: 'https://drive.google.com/file/d/1BVZwKpks5yQhw4ypi934H2SecYqmAsVz/view?usp=drive_link' },
-  { numero: 8, titulo: 'Ejes de giro', driveLink: 'https://drive.google.com/file/d/1Y2uQI4N3XAQgcPHkCbGkGMXs5J2vjUMZ/view?usp=drive_link' },
-  { numero: 9, titulo: 'Compensadores', driveLink: 'https://drive.google.com/file/d/1XM6ojovK_iqYiIyijQ1eyIPKyFzTr7_G/view?usp=drive_link' },
-  { numero: 10, titulo: 'Peso, carga y centrado 1', driveLink: 'https://drive.google.com/file/d/15NxGuggMQ5dIuxQEyIbFgSYbmW0o2JZb/view?usp=drive_link' },
-  { numero: 11, titulo: 'Peso, carga y centrado 2', driveLink: 'https://drive.google.com/file/d/16PvXJV0xvvA_yk8H_oYJo1EvaOrfbyfS/view?usp=drive_link' },
-  { numero: 12, titulo: 'Cálculo peso y centrado', driveLink: 'https://drive.google.com/file/d/1Fs6U4hF2nij7ZOaAObbmVEMJhKj8Sobs/view?usp=drive_link' },
-  { numero: 13, titulo: 'Cálculo peso y centrado 2', driveLink: 'https://drive.google.com/file/d/1_v02PTFABeCMPjFanlKM239zUH6RzRCs/view?usp=drive_link' },
-  { numero: 14, titulo: 'Rendimiento y limitaciones de la aeronave', driveLink: 'https://drive.google.com/file/d/1wGv3g8Gz3XTQlt280sBvVWBpLXdHbnce/view?usp=drive_link' },
-  { numero: 15, titulo: 'Autonomía', driveLink: 'https://drive.google.com/file/d/1hLmY9ceqKOR-E_cv6XwF6xM0eg-FiMcf/view?usp=drive_link' },
-  { numero: 16, titulo: 'Alcance', driveLink: 'https://drive.google.com/file/d/1I-SpjJBrC3qc6EjUl71F5HT4BeDDKGBH/view?usp=drive_link' },
-  { numero: 17, titulo: 'Partes del avión', driveLink: 'https://drive.google.com/file/d/1jpxQsQacbik-cSFy7t6H3oZkKTgrvuZA/view?usp=drive_link' },
-  { numero: 18, titulo: 'Tren de aterrizaje', driveLink: 'https://drive.google.com/file/d/1EQiOfXd0jwm8peB8wd1yxYd44V5UNlZB/view?usp=drive_link' },
-  { numero: 19, titulo: 'Motores', driveLink: 'https://drive.google.com/file/d/1c0BLyd1Ul3-4gWJDhK_YDnhPzUVXXoG9/view?usp=drive_link' },
-  { numero: 20, titulo: 'Sistema eléctrico', driveLink: 'https://drive.google.com/file/d/1uSe4zIK7VIMdm8_goBMzc2ebGS55nfYs/view?usp=drive_link' },
-  { numero: 21, titulo: 'Sistema de combustible', driveLink: 'https://drive.google.com/file/d/1rBqH--oRnxxFDzsSopQUIz7o2GuuBQcf/view?usp=drive_link' },
-  { numero: 22, titulo: 'Sistema de lubricaciones', driveLink: 'https://drive.google.com/file/d/1YIbWU8kPNNFKyy-k_RpbjAgeHQDsGNas/view?usp=drive_link' },
-  { numero: 23, titulo: 'Pitot estático', driveLink: 'https://drive.google.com/file/d/1IKfDkKO1scXForyHNf-T10kME3OrLDdW/view?usp=drive_link' },
-  { numero: 24, titulo: 'Instrumentos giroscópicos', driveLink: 'https://drive.google.com/file/d/1xeyC41aV9EduN1lmSkW2Yom9BYQ03ZX6/view?usp=drive_link' },
-  { numero: 25, titulo: 'Brújula', driveLink: 'https://drive.google.com/file/d/1yN4g_D9fAa5EpGzZR5Z2FSyBByIUwRVD/view?usp=drive_link' },
-  { numero: 26, titulo: 'Curso y rumbo magnético', driveLink: 'https://drive.google.com/file/d/1sCTOr7q5X0O454wJssuaMiqFXbAY-MYl/view?usp=drive_link' },
-  { numero: 27, titulo: 'Navegación observada y a estima', driveLink: 'https://drive.google.com/file/d/1F4SfDbfOeEqXIQDsIDmdViQbjnHVi59v/view?usp=drive_link' },
-  { numero: 28, titulo: 'Computador 1', driveLink: 'https://drive.google.com/file/d/1LPwqqLx70Ck2GcrNDVlj_kxmAGfywb6u/view?usp=drive_link' },
-  { numero: 29, titulo: 'Computador viento', driveLink: 'https://drive.google.com/file/d/1wQ5yG5Hf2e6cAqA9a67i8WL6dZNlRPim/view?usp=drive_link' },
-  { numero: 30, titulo: 'Radio ayudas', driveLink: 'https://drive.google.com/file/d/1Fjqh_ghkw6atvOcNOtLXJIq6gSWxoL78/view?usp=drive_link' },
-  { numero: 31, titulo: 'Capas de la atmósfera', driveLink: 'https://drive.google.com/file/d/1e-TcLvTD-Yp3Lgo6i3g7TqIBag3VT526/view?usp=drive_link' },
-  { numero: 32, titulo: 'Masas y frentes', driveLink: 'https://drive.google.com/file/d/1LlVTgmyCt2M2_SBtTH_EsGvHq5kgDmIZ/view?usp=drive_link' },
-  { numero: 33, titulo: 'Frentes explicados', driveLink: 'https://drive.google.com/file/d/1MhZJe5SxIP6yZIKSbTRyelPDezDMfQB-/view?usp=drive_link' },
-  { numero: 34, titulo: 'METAR', driveLink: 'https://drive.google.com/file/d/1psbIvkIXUxFlmYNEkb9Hc68gwAYkXeJX/view?usp=drive_link' },
-  { numero: 35, titulo: 'Gestión en cabina', driveLink: 'https://drive.google.com/file/d/1ENDZUeK3saWrmCRBrgvxwckaI80L5oKr/view?usp=drive_link' },
-  { numero: 36, titulo: 'Factores aeromédicos', driveLink: 'https://drive.google.com/file/d/1U4JO_QUx6DUeiRx4o3dy0qJW-IUzjx4u/view?usp=drive_link' },
-  { numero: 37, titulo: 'Señales aeropuertos', driveLink: 'https://drive.google.com/file/d/17DMDmA1q50q9YgMgorJpveXdDbDiYPt9/view?usp=drive_link' },
-  { numero: 38, titulo: 'Luces de pista', driveLink: 'https://drive.google.com/file/d/1v_a9rSB0TUwJxEoUN5VpS7HE-a8NhuZm/view?usp=drive_link' },
-];
 
 // Los videos se desbloquean en orden: el video 1 siempre está disponible;
 // para ver el video N (N>1) debes haber completado el video N-1.
-// Así se evita la dependencia circular con los exámenes (el examen del capítulo
-// requiere ver los 3 videos del capítulo; los videos no requieren aprobar exámenes).
 
 const EstudioTeorico = ({ isAuthenticated, userRole }) => {
   const [progress, setProgress] = useState(0);
   const [videosVistos, setVideosVistos] = useState({});
   const [examenesPorCapitulo, setExamenesPorCapitulo] = useState({});
+  const [videosDelCurso, setVideosDelCurso] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const pollingIntervalRef = useRef(null);
 
-  // Cargar progreso de videos, exámenes y porcentaje de avance (primer fetch)
+  // Cargar lista de videos (recursos) y progreso del alumno
   useEffect(() => {
-    const fetchProgress = async () => {
+    const fetchData = async () => {
       if (!isAuthenticated) {
+        setVideosDelCurso([]);
         setLoading(false);
         return;
       }
 
+      setLoading(true);
+      setError(null);
+
       try {
-        const response = await videoAPI.getProgress();
-        if (response.success) {
-          setVideosVistos(response.data.videosVistos || {});
-          setExamenesPorCapitulo(response.data.examenesPorCapitulo || {});
-          // Progreso real del alumno (basado en exámenes aprobados), admin siempre 100%
-          const progresoReal = userRole === 'admin' ? 100 : (response.data.progreso ?? 0);
+        const videosRes = await recursoAPI.getVideosTeorico();
+
+        if (videosRes.success && videosRes.data?.recursos?.length) {
+          const mapped = [...videosRes.data.recursos]
+            .sort((a, b) => (a.orden ?? 0) - (b.orden ?? 0))
+            .map((r) => ({
+              numero: Number(r.orden),
+              titulo: r.nombre,
+              driveLink: r.rutaOUrl,
+            }));
+          setVideosDelCurso(mapped);
+        } else {
+          setVideosDelCurso([]);
+          setError('No hay videos del curso configurados. Ejecutá la migración de base de datos o contactá al administrador.');
+        }
+      } catch (err) {
+        console.error('Error al cargar videos del curso:', err);
+        setError(err.message || 'Error al cargar la lista de videos');
+        setVideosDelCurso([]);
+      }
+
+      try {
+        const progressRes = await videoAPI.getProgress();
+        if (progressRes.success) {
+          setVideosVistos(progressRes.data.videosVistos || {});
+          setExamenesPorCapitulo(progressRes.data.examenesPorCapitulo || {});
+          const progresoReal = userRole === 'admin' ? 100 : (progressRes.data.progreso ?? 0);
           setProgress(progresoReal);
+        } else {
+          setError((prev) => prev || 'Error al cargar el progreso de videos');
         }
       } catch (err) {
         console.error('Error al cargar progreso:', err);
-        setError('Error al cargar el progreso de videos');
+        setError((prev) => prev || 'Error al cargar el progreso de videos');
       } finally {
         setLoading(false);
       }
     };
 
-    fetchProgress();
+    fetchData();
   }, [isAuthenticated, userRole]);
 
   // Polling periódico de progreso mientras haya videos "En progreso"
@@ -248,11 +232,17 @@ const EstudioTeorico = ({ isAuthenticated, userRole }) => {
               <div className="spinner"></div>
               <p>Cargando videos...</p>
             </div>
-          ) : error ? (
+          ) : videosDelCurso.length === 0 ? (
             <div className="error-videos">
-              <p>{error}</p>
+              <p>{error || 'No hay videos disponibles.'}</p>
             </div>
           ) : (
+            <>
+              {error && (
+                <div className="error-videos" style={{ marginBottom: '1rem' }}>
+                  <p>{error}</p>
+                </div>
+              )}
             <div className="videos-grid">
               {videosDelCurso.map((video) => {
                 const desbloqueado = isVideoDesbloqueado(video.numero);
@@ -300,6 +290,7 @@ const EstudioTeorico = ({ isAuthenticated, userRole }) => {
                 );
               })}
             </div>
+            </>
           )}
         </div>
       </div>

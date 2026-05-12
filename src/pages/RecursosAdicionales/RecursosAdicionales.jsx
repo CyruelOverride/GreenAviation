@@ -27,7 +27,10 @@ const RecursosAdicionales = ({ isAuthenticated }) => {
         setLoading(true);
         setError(null);
         try {
-          const response = await recursoAPI.getAll({ soloActivos: 'true' });
+          const response = await recursoAPI.getAll({
+            soloActivos: 'true',
+            excludeCategoria: 'videoTeorico',
+          });
           if (response.success && response.data?.recursos) {
             setRecursos(response.data.recursos);
           } else {

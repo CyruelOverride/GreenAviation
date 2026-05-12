@@ -220,6 +220,7 @@ const GestionRecursos = ({ isAuthenticated, userRole }) => {
             <option value="manuales">Manuales</option>
             <option value="reglamentos">Reglamentos</option>
             <option value="videos">Videos</option>
+            <option value="videoTeorico">Videos curso teórico</option>
             <option value="documentos">Documentos</option>
             <option value="general">General</option>
           </select>
@@ -418,6 +419,7 @@ const GestionRecursos = ({ isAuthenticated, userRole }) => {
                     <option value="aip-ad">AIP - AD</option>
                     <option value="aip-enr">AIP - ENR</option>
                     <option value="videos">Videos</option>
+                    <option value="videoTeorico">Videos curso teórico</option>
                     <option value="documentos">Documentos</option>
                   </select>
                 </div>
