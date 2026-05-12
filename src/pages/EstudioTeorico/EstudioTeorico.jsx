@@ -7,7 +7,7 @@ import './EstudioTeorico.css';
 const videosDelCurso = [
   { numero: 1, titulo: 'Principios del vuelo', driveLink: 'https://drive.google.com/file/d/1gufozkH1NeP8282OUCoNAu2VcDPVKvid/view?usp=drive_link' },
   { numero: 2, titulo: 'Resistencia parásita', driveLink: 'https://drive.google.com/file/d/1EEQZ0W93haLzt786nKmMCA5g3nSDxBOM/view?usp=drive_link' },
-  { numero: 3, titulo: 'Factores de carga', driveLink: 'https://drive.google.com/file/d/1W5MZnQRVsW9-uQPZLPOTrCMUK2rrzXhQ/view?usp=drive_link' },
+  { numero: 3, titulo: 'Factores de carga', driveLink: 'https://drive.google.com/file/d/1W5MZnQRVsW9-uQPZLPOTrCMUK2rrzXhQ/view?usp=drivesdk' },
   { numero: 4, titulo: 'Virajes ROT y radio', driveLink: 'https://drive.google.com/file/d/1wwUn2ziJ1M0x9jKTbAmbYXFh9xeW_PbB/view?usp=drivesdk' },
   { numero: 5, titulo: 'Tipos de estabilidad', driveLink: 'https://drive.google.com/file/d/11A01VByhBZDkK4scUdcvHJ0whbm5b-Nu/view?usp=drive_link' },
   { numero: 6, titulo: 'Estabilidad de los 3 ejes', driveLink: 'https://drive.google.com/file/d/1ujo7U9hmyrakiQydBKjZul_Klm4kTcLx/view?usp=drive_link' },
