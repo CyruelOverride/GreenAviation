@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { userAPI } from '../../services/api';
+import ExamenesAlumnoModal from './ExamenesAlumnoModal';
+import DetalleExamen from '../Examenes/DetalleExamen';
 import './GestionAlumnos.css';
 
 const GestionAlumnos = ({ userRole, isAuthenticated }) => {
@@ -61,6 +63,8 @@ const GestionAlumnos = ({ userRole, isAuthenticated }) => {
     }
   });
   const [createLoading, setCreateLoading] = useState(false);
+  const [alumnoExamenesModal, setAlumnoExamenesModal] = useState(null);
+  const [examenDetalleOverlay, setExamenDetalleOverlay] = useState(null);
 
   const getInitialEditFormData = (student = {}) => ({
     nombre: student.nombre || '',
@@ -522,6 +526,12 @@ const GestionAlumnos = ({ userRole, isAuthenticated }) => {
                           onClick={() => handleOpenEditStudent(student)}
                         >
                           Editar
+                        </button>
+                        <button
+                          className="btn-examenes"
+                          onClick={() => setAlumnoExamenesModal(student)}
+                        >
+                          Exámenes
                         </button>
                         <button 
                           className="btn-secondary"
@@ -1351,6 +1361,7 @@ const GestionAlumnos = ({ userRole, isAuthenticated }) => {
                               <th>Fecha</th>
                               <th>Puntaje</th>
                               <th>Estado</th>
+                              <th>Acción</th>
                             </tr>
                           </thead>
                           <tbody>
@@ -1365,11 +1376,31 @@ const GestionAlumnos = ({ userRole, isAuthenticated }) => {
                                       ? new Date(ex.fechaCreacion).toLocaleDateString()
                                       : '-'}
                                 </td>
-                                <td>{ex.puntaje != null ? ex.puntaje : '-'}</td>
+                                <td>{ex.puntaje != null ? `${Number(ex.puntaje).toFixed(2)}%` : '-'}</td>
                                 <td>
                                   <span className={`status-badge ${(ex.estado || '').toLowerCase()}`}>
                                     {ex.estado || '-'}
                                   </span>
+                                </td>
+                                <td>
+                                  {ex.estado === 'COMPLETADO' ? (
+                                    <button
+                                      type="button"
+                                      className="btn-ver-detalle-examen"
+                                      onClick={() =>
+                                        setExamenDetalleOverlay({
+                                          examenId: ex.id,
+                                          alumnoNombre:
+                                            `${selectedStudent.nombre || ''} ${selectedStudent.apellido || ''}`.trim() ||
+                                            selectedStudent.email
+                                        })
+                                      }
+                                    >
+                                      Ver detalle
+                                    </button>
+                                  ) : (
+                                    '—'
+                                  )}
                                 </td>
                               </tr>
                             ))}
@@ -1485,6 +1516,37 @@ const GestionAlumnos = ({ userRole, isAuthenticated }) => {
               <button className="btn-delete" onClick={() => handleDeleteStudent(selectedStudent)}>
                 Eliminar alumno
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {alumnoExamenesModal && (
+        <ExamenesAlumnoModal
+          alumno={alumnoExamenesModal}
+          onClose={() => setAlumnoExamenesModal(null)}
+        />
+      )}
+
+      {examenDetalleOverlay && (
+        <div
+          className="student-modal student-modal-overlay-detalle"
+          onClick={(e) =>
+            e.target === e.currentTarget && setExamenDetalleOverlay(null)
+          }
+        >
+          <div
+            className="modal-content modal-content-examen-detalle"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="modal-body modal-body-examen-detalle">
+              <DetalleExamen
+                examenId={examenDetalleOverlay.examenId}
+                onVolver={() => setExamenDetalleOverlay(null)}
+                volverLabel="Cerrar detalle"
+                embedded
+                alumnoNombre={examenDetalleOverlay.alumnoNombre}
+              />
             </div>
           </div>
         </div>

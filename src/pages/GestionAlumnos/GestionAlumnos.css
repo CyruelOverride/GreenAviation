@@ -618,6 +618,69 @@
   background-color: #d97706;
 }
 
+.btn-examenes {
+  padding: 8px 14px;
+  background-color: #0d9488;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  white-space: nowrap;
+}
+
+.btn-examenes:hover {
+  background-color: #0f766e;
+}
+
+.btn-ver-detalle-examen {
+  padding: 6px 12px;
+  background-color: #1e3a8a;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  white-space: nowrap;
+}
+
+.btn-ver-detalle-examen:hover {
+  background-color: #1d4ed8;
+}
+
+.modal-content-examenes-lista {
+  max-width: 960px;
+  width: 95%;
+}
+
+.modal-content-examen-detalle {
+  max-width: 1000px;
+  width: 95%;
+  max-height: 92vh;
+}
+
+.modal-body-examen-detalle {
+  padding: 16px 20px 24px;
+}
+
+.student-modal-overlay-detalle {
+  z-index: 2100;
+}
+
+.examenes-alumno-error {
+  color: #dc2626;
+  background: #fef2f2;
+  padding: 12px;
+  border-radius: 6px;
+  margin-bottom: 12px;
+}
+
+.examenes-alumno-sin-detalle {
+  color: #9ca3af;
+}
+
 @media (max-width: 768px) {
   .page-header {
     flex-direction: column;

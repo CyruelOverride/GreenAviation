@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { examenAPI, videoAPI } from '../../services/api';
+import DetalleExamen from './DetalleExamen';
 import './Examenes.css';
 
 const Examenes = ({ isAuthenticated, userRole }) => {
@@ -16,6 +17,7 @@ const Examenes = ({ isAuthenticated, userRole }) => {
   const [capituloSeleccionado, setCapituloSeleccionado] = useState(null);
   const [examenesDisponibles, setExamenesDisponibles] = useState([]);
   const [loadingHabilitaciones, setLoadingHabilitaciones] = useState(true);
+  const [examenDetalleId, setExamenDetalleId] = useState(null);
 
   useEffect(() => {
     const fetchHabilitaciones = async () => {
@@ -42,6 +44,13 @@ const Examenes = ({ isAuthenticated, userRole }) => {
   const isExamenDesbloqueado = (item) => {
     if (userRole === 'admin') return true;
     return item.habilitado === true;
+  };
+
+  const tieneIntentosRestantes = (item) => {
+    if (userRole === 'admin') return true;
+    const instancias = item.instancias ?? 1;
+    const usados = item.intentosUsados ?? 0;
+    return usados < instancias;
   };
 
   const getMensajeBloqueoExamen = (item) => {
@@ -165,8 +174,34 @@ const Examenes = ({ isAuthenticated, userRole }) => {
     setUserAnswers({});
     setExamFinished(false);
     setCapituloSeleccionado(null);
+    setExamenDetalleId(null);
     setError(null);
   };
+
+  const handleVerResultado = (examenId) => {
+    setExamenDetalleId(examenId);
+  };
+
+  const handleVolverDeDetalle = () => {
+    setExamenDetalleId(null);
+    // Recargar habilitaciones para reflejar cambios si los hubiera
+    const fetchHabilitaciones = async () => {
+      try {
+        const response = await examenAPI.getHabilitaciones();
+        if (response.success) {
+          setExamenesDisponibles(response.data.habilitaciones || []);
+        }
+      } catch (err) {
+        console.error('Error al recargar habilitaciones:', err);
+      }
+    };
+    fetchHabilitaciones();
+  };
+
+  // Vista de detalle de examen completado (desde el listado)
+  if (examenDetalleId) {
+    return <DetalleExamen examenId={examenDetalleId} onVolver={handleVolverDeDetalle} />;
+  }
 
   // Vista de resultados
   if (examFinished && examen && examen.preguntas) {
@@ -383,6 +418,10 @@ const Examenes = ({ isAuthenticated, userRole }) => {
             {examenesDisponibles.map((item) => {
               const desbloqueado = isExamenDesbloqueado(item);
               const mensajeBloqueo = getMensajeBloqueoExamen(item);
+              const intentosRestantes = tieneIntentosRestantes(item);
+              const instancias = item.instancias ?? 1;
+              const intentosUsados = item.intentosUsados ?? 0;
+              const puedeHacerExamen = desbloqueado && intentosRestantes;
 
               return (
                 <div key={item.capituloId} className={`exam-card ${!desbloqueado ? 'locked' : ''}`}>
@@ -392,19 +431,37 @@ const Examenes = ({ isAuthenticated, userRole }) => {
                     <span>Duración: 60 minutos</span>
                     <span>Preguntas (máx.): {item.maxPreguntas ?? 15}</span>
                   </div>
+                  {userRole !== 'admin' && (
+                    <p className={`exam-intentos ${!intentosRestantes ? 'agotado' : ''}`}>
+                      Intentos: {intentosUsados} / {instancias}
+                    </p>
+                  )}
                   {mensajeBloqueo && (
                     <p className="exam-lock-message">{mensajeBloqueo}</p>
                   )}
+                  {!intentosRestantes && desbloqueado && userRole !== 'admin' && (
+                    <p className="exam-lock-message">Sin intentos restantes</p>
+                  )}
+                  {item.ultimoExamenCompletadoId && (
+                    <button
+                      className="btn-success"
+                      onClick={() => handleVerResultado(item.ultimoExamenCompletadoId)}
+                    >
+                      Ver resultado
+                    </button>
+                  )}
                   <button
-                    className={desbloqueado ? "btn-primary" : "btn-disabled"}
-                    onClick={() => desbloqueado && handleStartExam(item)}
-                    disabled={loading || !desbloqueado}
+                    className={puedeHacerExamen ? 'btn-primary' : 'btn-disabled'}
+                    onClick={() => puedeHacerExamen && handleStartExam(item)}
+                    disabled={loading || !puedeHacerExamen}
                   >
                     {loading && capituloSeleccionado === item.capituloId
                       ? 'Creando...'
-                      : desbloqueado
-                        ? 'Hacer Examen'
-                        : 'Bloqueado'}
+                      : !desbloqueado
+                        ? 'Bloqueado'
+                        : !intentosRestantes
+                          ? 'Sin intentos'
+                          : 'Hacer Examen'}
                   </button>
                 </div>
               );
