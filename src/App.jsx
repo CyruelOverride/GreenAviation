@@ -9,6 +9,7 @@ import Examenes from './pages/Examenes/Examenes';
 import GestionAlumnos from './pages/GestionAlumnos/GestionAlumnos';
 import GestionVuelos from './pages/GestionVuelos/GestionVuelos';
 import GestionPreguntas from './pages/GestionPreguntas/GestionPreguntas';
+import GestionCapitulos from './pages/GestionCapitulos/GestionCapitulos';
 import GestionRecursos from './pages/GestionRecursos/GestionRecursos';
 import MiPerfil from './pages/MiPerfil/MiPerfil';
 import RecursosAdicionales from './pages/RecursosAdicionales/RecursosAdicionales';
@@ -148,6 +149,10 @@ function App() {
               <Route 
                 path="/gestion-preguntas" 
                 element={<GestionPreguntas userRole={userRole} isAuthenticated={isAuthenticated} />}
+              />
+              <Route 
+                path="/gestion-capitulos" 
+                element={<GestionCapitulos userRole={userRole} isAuthenticated={isAuthenticated} />}
               />
               <Route 
                 path="/gestion-recursos" 

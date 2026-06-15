@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { preguntaAPI, opcionAPI, examenAPI, capituloAPI } from '../../services/api';
+import { Link } from 'react-router-dom';
+import { preguntaAPI, opcionAPI, capituloAPI } from '../../services/api';
 import './GestionPreguntas.css';
 
 const GestionPreguntas = ({ isAuthenticated, userRole }) => {
@@ -7,19 +8,14 @@ const GestionPreguntas = ({ isAuthenticated, userRole }) => {
   const [capituloSeleccionadoId, setCapituloSeleccionadoId] = useState('');
   const [preguntas, setPreguntas] = useState([]);
   const [busqueda, setBusqueda] = useState('');
-  const [politicasExpandida, setPoliticasExpandida] = useState(false);
-  const [nuevoCapExpandida, setNuevoCapExpandida] = useState(false);
   const [loading, setLoading] = useState(false);
   const [loadingCapitulos, setLoadingCapitulos] = useState(false);
   const [error, setError] = useState(null);
   const [editingPregunta, setEditingPregunta] = useState(null);
   const [editingOpcion, setEditingOpcion] = useState(null);
   const [saving, setSaving] = useState(false);
-  const [savingHabilitacion, setSavingHabilitacion] = useState(null);
-  const [habilitacionesError, setHabilitacionesError] = useState(null);
   const [creating, setCreating] = useState(false);
   const [createError, setCreateError] = useState(null);
-  const [savingMaxPreguntas, setSavingMaxPreguntas] = useState(null);
   const [newPregunta, setNewPregunta] = useState({
     enunciado: '',
     activa: true,
@@ -28,17 +24,8 @@ const GestionPreguntas = ({ isAuthenticated, userRole }) => {
       { texto: '', esCorrecta: false }
     ]
   });
-  const [nuevoCapitulo, setNuevoCapitulo] = useState({
-    nombre: '',
-    numeroCurso: '',
-    maxPreguntas: 15
-  });
-  const [creatingCapitulo, setCreatingCapitulo] = useState(false);
-  const [createCapError, setCreateCapError] = useState(null);
-
   const loadCapitulos = async () => {
     setLoadingCapitulos(true);
-    setHabilitacionesError(null);
     try {
       const response = await capituloAPI.list();
       if (response.success) {
@@ -50,7 +37,7 @@ const GestionPreguntas = ({ isAuthenticated, userRole }) => {
         });
       }
     } catch (err) {
-      setHabilitacionesError(err.message || 'Error al cargar capítulos');
+      setError(err.message || 'Error al cargar capítulos');
       console.error(err);
     } finally {
       setLoadingCapitulos(false);
@@ -68,42 +55,6 @@ const GestionPreguntas = ({ isAuthenticated, userRole }) => {
       loadPreguntas();
     }
   }, [capituloSeleccionadoId, isAuthenticated, userRole]);
-
-  const handleToggleHabilitacion = async (capituloId, nextValue) => {
-    setSavingHabilitacion(capituloId);
-    setHabilitacionesError(null);
-    try {
-      const response = await examenAPI.updateHabilitacion(capituloId, nextValue);
-      if (response.success) {
-        await loadCapitulos();
-      }
-    } catch (err) {
-      setHabilitacionesError(err.message || 'Error al actualizar habilitación');
-      console.error(err);
-    } finally {
-      setSavingHabilitacion(null);
-    }
-  };
-
-  const handleMaxPreguntasBlur = async (capituloId, raw) => {
-    const n = parseInt(String(raw).trim(), 10);
-    if (Number.isNaN(n) || n < 1 || n > 100) return;
-    const cap = capitulos.find((c) => c.id === capituloId);
-    if (cap && cap.maxPreguntas === n) return;
-    setSavingMaxPreguntas(capituloId);
-    setHabilitacionesError(null);
-    try {
-      const response = await capituloAPI.patch(capituloId, { maxPreguntas: n });
-      if (response.success) {
-        await loadCapitulos();
-      }
-    } catch (err) {
-      setHabilitacionesError(err.message || 'Error al guardar máximo de preguntas');
-      console.error(err);
-    } finally {
-      setSavingMaxPreguntas(null);
-    }
-  };
 
   const loadPreguntas = async () => {
     setLoading(true);
@@ -295,39 +246,6 @@ const GestionPreguntas = ({ isAuthenticated, userRole }) => {
     }
   };
 
-  const handleCreateCapitulo = async (e) => {
-    e.preventDefault();
-    setCreateCapError(null);
-    const nombre = nuevoCapitulo.nombre.trim();
-    if (!nombre) {
-      setCreateCapError('El nombre del capítulo es requerido');
-      return;
-    }
-    setCreatingCapitulo(true);
-    try {
-      const payload = {
-        nombre,
-        maxPreguntas: parseInt(nuevoCapitulo.maxPreguntas, 10) || 15
-      };
-      if (nuevoCapitulo.numeroCurso !== '' && nuevoCapitulo.numeroCurso != null) {
-        payload.numeroCurso = parseInt(nuevoCapitulo.numeroCurso, 10);
-      }
-      const response = await capituloAPI.create(payload);
-      if (response.success) {
-        setNuevoCapitulo({ nombre: '', numeroCurso: '', maxPreguntas: 15 });
-        await loadCapitulos();
-        if (response.data?.capitulo?.id) {
-          setCapituloSeleccionadoId(String(response.data.capitulo.id));
-        }
-      }
-    } catch (err) {
-      setCreateCapError(err.message || 'Error al crear capítulo');
-      console.error(err);
-    } finally {
-      setCreatingCapitulo(false);
-    }
-  };
-
   const capituloActivo = capitulos.find((c) => String(c.id) === String(capituloSeleccionadoId));
 
   const preguntasFiltradas = useMemo(() => {
@@ -361,7 +279,8 @@ const GestionPreguntas = ({ isAuthenticated, userRole }) => {
       <header className="gp-page-header">
         <h1 className="page-title">Gestión de preguntas</h1>
         <p className="gp-lead">
-          Elegí un capítulo o examen, revisá la política de acceso y sumá o editá preguntas del banco.
+          Elegí un capítulo y sumá o editá preguntas del banco. Para crear capítulos o cambiar su configuración, usá{' '}
+          <Link to="/gestion-capitulos">Gestión de Capítulos</Link>.
         </p>
       </header>
 
@@ -470,140 +389,6 @@ const GestionPreguntas = ({ isAuthenticated, userRole }) => {
             )}
           </ul>
         </div>
-      </div>
-
-      <div className="gp-collapsible">
-        <button
-          type="button"
-          className="gp-collapsible__trigger"
-          onClick={() => setNuevoCapExpandida((v) => !v)}
-          aria-expanded={nuevoCapExpandida}
-        >
-          <span className="gp-collapsible__title">Nuevo capítulo de examen</span>
-          <span className="gp-collapsible__hint">Nombre propio y reglas del intento</span>
-          <span className="gp-collapsible__chevron" aria-hidden>
-            {nuevoCapExpandida ? '▼' : '▶'}
-          </span>
-        </button>
-        {nuevoCapExpandida && (
-          <div className="gp-collapsible__panel create-capitulo-section">
-            <p className="exam-access-description">
-              Creá un banco nuevo de preguntas. El número de tema del curso (1–13) es opcional: sirve para
-              desbloqueo por vídeos y el progreso del alumno.
-            </p>
-            {createCapError && <div className="error-message">{createCapError}</div>}
-            <form onSubmit={handleCreateCapitulo} className="create-question-form gp-form-narrow">
-              <label className="form-label">
-                Nombre del examen / capítulo
-                <input
-                  type="text"
-                  value={nuevoCapitulo.nombre}
-                  onChange={(e) => setNuevoCapitulo((p) => ({ ...p, nombre: e.target.value }))}
-                  className="gp-input-text"
-                  placeholder="Ej. Examen prueba Dinacia"
-                />
-              </label>
-              <div className="gp-form-row">
-                <label className="form-label">
-                  N.º tema curso (opcional)
-                  <input
-                    type="number"
-                    min={1}
-                    max={13}
-                    value={nuevoCapitulo.numeroCurso}
-                    onChange={(e) => setNuevoCapitulo((p) => ({ ...p, numeroCurso: e.target.value }))}
-                    placeholder="1–13"
-                    className="gp-input-text"
-                  />
-                </label>
-                <label className="form-label">
-                  Máx. preguntas en examen
-                  <input
-                    type="number"
-                    min={1}
-                    max={100}
-                    value={nuevoCapitulo.maxPreguntas}
-                    onChange={(e) => setNuevoCapitulo((p) => ({ ...p, maxPreguntas: e.target.value }))}
-                    className="gp-input-text"
-                  />
-                </label>
-              </div>
-              <button type="submit" className="btn-primary" disabled={creatingCapitulo}>
-                {creatingCapitulo ? 'Creando…' : 'Crear capítulo'}
-              </button>
-            </form>
-          </div>
-        )}
-      </div>
-
-      <div className="gp-collapsible gp-collapsible--spaced">
-        <button
-          type="button"
-          className="gp-collapsible__trigger"
-          onClick={() => setPoliticasExpandida((v) => !v)}
-          aria-expanded={politicasExpandida}
-        >
-          <span className="gp-collapsible__title">Política de exámenes por capítulo</span>
-          <span className="gp-collapsible__hint">Habilitación y máximo de preguntas por intento</span>
-          <span className="gp-collapsible__chevron" aria-hidden>
-            {politicasExpandida ? '▼' : '▶'}
-          </span>
-        </button>
-        {politicasExpandida && (
-          <div className="gp-collapsible__panel exam-access-section">
-            <p className="exam-access-description">
-              Definí si los alumnos pueden rendir cada examen y cuántas preguntas aleatorias incluye cada intento (1–100).
-              Al salir del campo «Máx. preguntas» se guarda automáticamente.
-            </p>
-            {habilitacionesError && <div className="error-message">{habilitacionesError}</div>}
-            {loadingCapitulos ? (
-              <div className="loading-message">Cargando capítulos…</div>
-            ) : (
-              <div className="exam-access-grid">
-                {capitulos.map((c) => {
-                  const habilitado = c.habilitado === true;
-                  const bloqueado = savingHabilitacion === c.id;
-                  const guardandoMax = savingMaxPreguntas === c.id;
-
-                  return (
-                    <div key={`habilitacion-${c.id}`} className="exam-access-item">
-                      <div className="exam-access-item__head">
-                        <span className="exam-access-title">{c.nombre}</span>
-                        {c.numeroCurso != null && (
-                          <span className="exam-access-badge">Tema {c.numeroCurso}</span>
-                        )}
-                      </div>
-                      <div className="exam-access-item__controls">
-                        <label className="gp-mini-label">
-                          Máx. preguntas
-                          <input
-                            type="number"
-                            min={1}
-                            max={100}
-                            className="gp-input-number"
-                            defaultValue={c.maxPreguntas}
-                            key={`max-${c.id}-${c.maxPreguntas}`}
-                            disabled={guardandoMax}
-                            onBlur={(e) => handleMaxPreguntasBlur(c.id, e.target.value)}
-                          />
-                        </label>
-                        {guardandoMax && <span className="gp-saving">Guardando…</span>}
-                        <button
-                          type="button"
-                          className={`toggle-btn ${habilitado ? 'enabled' : 'disabled'}`}
-                          onClick={() => handleToggleHabilitacion(c.id, !habilitado)}
-                          disabled={bloqueado}
-                        >
-                          {bloqueado ? '…' : habilitado ? 'Habilitado' : 'Bloqueado'}
-                        </button>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-        )}
       </div>
 
       <div className="create-question-section gp-create-section">

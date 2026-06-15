@@ -152,6 +152,14 @@ const Sidebar = ({ userRole, isAuthenticated, isOpen, onClose }) => {
                 <span>Gestión de Vuelos</span>
               </Link>
               <Link 
+                to="/gestion-capitulos" 
+                className={`nav-item ${isActive('/gestion-capitulos') ? 'active' : ''}`}
+                onClick={handleLinkClick}
+              >
+                <span className="nav-icon">📑</span>
+                <span>Gestión de Capítulos</span>
+              </Link>
+              <Link 
                 to="/gestion-preguntas" 
                 className={`nav-item ${isActive('/gestion-preguntas') ? 'active' : ''}`}
                 onClick={handleLinkClick}
