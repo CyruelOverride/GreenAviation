@@ -1,0 +1,18 @@
+.video-maniobras {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.video-maniobras .page-title {
+  font-size: 28px;
+  color: #1e3a8a;
+  margin-bottom: 24px;
+}
+
+.video-descripcion-item {
+  font-size: 13px;
+  color: #6b7280;
+  margin-top: 4px;
+  line-height: 1.4;
+}

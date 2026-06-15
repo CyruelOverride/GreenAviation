@@ -32,7 +32,10 @@ const RecursosAdicionales = ({ isAuthenticated }) => {
             excludeCategoria: 'videoTeorico',
           });
           if (response.success && response.data?.recursos) {
-            setRecursos(response.data.recursos);
+            const filtrados = response.data.recursos.filter(
+              (r) => r.categoria !== 'videoTeorico' && r.categoria !== 'videoManiobra'
+            );
+            setRecursos(filtrados);
           } else {
             setRecursos([]);
           }

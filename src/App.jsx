@@ -4,6 +4,7 @@ import Header from './components/Header/Header';
 import Sidebar from './components/Sidebar/Sidebar';
 import Home from './pages/Home/Home';
 import EstudioTeorico from './pages/EstudioTeorico/EstudioTeorico';
+import VideoManiobras from './pages/VideoManiobras/VideoManiobras';
 import Examenes from './pages/Examenes/Examenes';
 import GestionAlumnos from './pages/GestionAlumnos/GestionAlumnos';
 import GestionVuelos from './pages/GestionVuelos/GestionVuelos';
@@ -127,6 +128,10 @@ function App() {
               <Route 
                 path="/estudio-teorico" 
                 element={<EstudioTeorico isAuthenticated={isAuthenticated} userRole={userRole} />}
+              />
+              <Route 
+                path="/video-maniobras" 
+                element={<VideoManiobras isAuthenticated={isAuthenticated} userRole={userRole} />}
               />
               <Route 
                 path="/examenes" 

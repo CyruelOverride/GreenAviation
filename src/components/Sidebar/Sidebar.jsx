@@ -69,8 +69,8 @@ const Sidebar = ({ userRole, isAuthenticated, isOpen, onClose }) => {
                   <span className="subitem-icon">{isAuthenticated ? '•' : '🔒'}</span>
                   <span>Videos Teoricos del Curso</span>
                 </Link>
-                <Link to="/estudio-teorico" className="nav-subitem" onClick={handleLinkClick}>
-                  <span className="subitem-icon">•</span>
+                <Link to="/video-maniobras" className={`nav-subitem ${isActive('/video-maniobras') ? 'active' : ''}`} onClick={handleLinkClick}>
+                  <span className="subitem-icon">{isAuthenticated ? '•' : '🔒'}</span>
                   <span>Videos de maniobras</span>
                 </Link>
               </div>
