@@ -41,7 +41,7 @@ const EstudioTeorico = ({ isAuthenticated, userRole }) => {
           setVideosDelCurso(mapped);
         } else {
           setVideosDelCurso([]);
-          setError('No hay videos del curso configurados. Ejecutá la migración de base de datos o contactá al administrador.');
+          setError('No hay videos del curso configurados');
         }
       } catch (err) {
         console.error('Error al cargar videos del curso:', err);
@@ -105,7 +105,7 @@ const EstudioTeorico = ({ isAuthenticated, userRole }) => {
         } catch (err) {
           console.error('Error al actualizar progreso (polling):', err);
         }
-      }, 4 * 60 * 1000); // cada 4 minutos
+      }, 4 * 60 * 1000); 
     }
 
     return () => {
@@ -116,13 +116,16 @@ const EstudioTeorico = ({ isAuthenticated, userRole }) => {
     };
   }, [isAuthenticated, userRole, videosVistos]);
 
-  // Verificar si un video está desbloqueado: solo se requiere haber completado el video anterior
+  // const isVideoDesbloqueado = (videoNumero) => {
+  //   if (userRole === 'admin') return true;
+  //   if (videoNumero === 1) return true;
+  //   const videoAnterior = videoNumero - 1;
+  //   return videosVistos[videoAnterior]?.completado === true;
+  // };
+
   const isVideoDesbloqueado = (videoNumero) => {
-    if (userRole === 'admin') return true;
-    if (videoNumero === 1) return true;
-    const videoAnterior = videoNumero - 1;
-    return videosVistos[videoAnterior]?.completado === true;
-  };
+    return true;
+};
 
   // Mensaje cuando el video está bloqueado
   const getMensajeBloqueo = (videoNumero) => {
@@ -137,10 +140,8 @@ const EstudioTeorico = ({ isAuthenticated, userRole }) => {
     if (!isVideoDesbloqueado(video.numero)) return;
 
     try {
-      // Registrar que el usuario empezó a ver el video
       await videoAPI.startVideo(video.numero);
       
-      // Actualizar estado local
       setVideosVistos(prev => ({
         ...prev,
         [video.numero]: {
@@ -149,11 +150,9 @@ const EstudioTeorico = ({ isAuthenticated, userRole }) => {
         }
       }));
       
-      // Abrir el video en una nueva pestaña
       window.open(video.driveLink, '_blank', 'noopener,noreferrer');
     } catch (err) {
       console.error('Error al registrar video:', err);
-      // Aún así abrir el video
       window.open(video.driveLink, '_blank', 'noopener,noreferrer');
     }
   };
